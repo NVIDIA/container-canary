@@ -8,17 +8,17 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "containercanairy",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
+	Use:   "canairy",
+	Short: "A little bird to validate your containers",
+	Long: `A little bird for validating your containers can integrate with popular
+platforms. Many compute platforms have a "Bring your own container" model to allow
+for customization. Container Conairy validates whether your container images will
+be compatible with a range of platforms.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+Example:
+$ canairy validate kubeflow myorg/mycontainer:rev
+
+`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

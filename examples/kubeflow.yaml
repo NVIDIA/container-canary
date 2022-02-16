@@ -1,0 +1,15 @@
+apiVersion: containercanairy.jacobtomlinson.dev/v1
+kind: Validator
+name: kubeflow
+description: Kubeflow notebooks
+checks:
+  - name: user
+    description: User is jovyan
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $(whoami) = jovyan ]"
+        initialDelaySeconds: 10
+        periodSeconds: 5
