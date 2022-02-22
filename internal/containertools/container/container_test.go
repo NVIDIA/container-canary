@@ -3,10 +3,22 @@ package container
 import (
 	"strings"
 	"testing"
+
+	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
+	v1 "k8s.io/api/core/v1"
 )
 
 func TestContainer(t *testing.T) {
-	c := New("nginx")
+	env := []v1.EnvVar{
+		{Name: "FOO", Value: "BAR"},
+	}
+	ports := []v1.ServicePort{
+		{Port: 80, Protocol: "TCP"},
+	}
+	volumes := []config.Volume{
+		{MountPath: "/foo"},
+	}
+	c := New("nginx", env, ports, volumes)
 
 	err := c.Start()
 	defer c.Remove()
@@ -28,7 +40,7 @@ func TestContainer(t *testing.T) {
 	}
 }
 func TestContainerRemoves(t *testing.T) {
-	c := New("nginx")
+	c := New("nginx", nil, nil, nil)
 
 	err := c.Start()
 	if err != nil {

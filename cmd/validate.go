@@ -3,30 +3,35 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/jacobtomlinson/containercanairy/internal/checks"
-	"github.com/jacobtomlinson/containercanairy/internal/platforms"
+	"github.com/jacobtomlinson/containercanairy/internal/config"
+	"github.com/jacobtomlinson/containercanairy/internal/validator"
 	"github.com/spf13/cobra"
 )
 
 var validateCmd = &cobra.Command{
-	Use:   "validate",
+	Use:   "validate [IMAGE]",
 	Short: "Validate a container against a platform",
 	Long:  ``,
-}
-
-var validateKubeflowCmd = &cobra.Command{
-	Use:   "kubeflow [IMAGE]",
-	Short: "Validate a container against kubeflow",
-	Long:  ``,
 	Args:  imageArg,
-	Run: func(cmd *cobra.Command, args []string) {
-		if !platforms.ValidateKubeflow(args[0]) {
-			fmt.Println("FAILED")
-			os.Exit(1)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		file, _ := cmd.Flags().GetString("file")
+		// TODO Support loading from Url
+		// TODO Check file exists
+		validatorConfig, _ := config.LoadValidatorFromFile(file)
+		image := args[0]
+		cmd.Printf("Validating %s against %s\n", image, validatorConfig.Name)
+		v, err := validator.Validate(image, validatorConfig)
+		if err != nil {
+			cmd.Printf("Error: %s\n", err.Error())
+			return fmt.Errorf("ERRORED")
 		}
-		fmt.Println("PASSED")
+		if !v {
+			return fmt.Errorf("FAILED")
+		}
+		cmd.Println("PASSED")
+		return nil
 	},
 }
 
@@ -49,7 +54,7 @@ func imageArg(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	validateCmd.AddCommand(validateKubeflowCmd)
-
 	rootCmd.AddCommand(validateCmd)
+	validateCmd.PersistentFlags().String("file", "", "Path or URL of a manifest to validate against.")
+
 }

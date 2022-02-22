@@ -2,14 +2,60 @@ apiVersion: containercanairy.jacobtomlinson.dev/v1
 kind: Validator
 name: kubeflow
 description: Kubeflow notebooks
+env:
+  - name: NB_PREFIX
+    value: /hub/jovyan/
+ports:
+  - port: 8888
+    protocol: TCP
+volumes:
+  - mountPath: /home/jovyan
 checks:
   - name: user
-    description: User is jovyan
+    description: 👩 User is jovyan
     probe:
       exec:
         command:
           - /bin/sh
           - -c
           - "[ $(whoami) = jovyan ]"
-        initialDelaySeconds: 10
-        periodSeconds: 5
+  - name: uid
+    description: 🆔 User ID is 1000
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $(id) = *uid=1000* ]"
+  - name: home
+    description: 🏠 Home directory is /home/jovyan
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $HOME = /home/jovyan ]"
+  - name: http
+    description: 🏠 Exposes an HTTP interface on port 8888
+    probe:
+      httpGet:
+        path: /
+        port: 8888
+      initialDelaySeconds: 10
+  - name: NB_PREFIX
+    description: 🏠 Correctly routes the NB_PREFIX
+    probe:
+      httpGet:
+        path: /hub/jovyan/lab
+        port: 8888
+      initialDelaySeconds: 10
+  - name: allow-origin-all
+    description: "🏠 Sets 'Access-Control-Allow-Origin: *' header"
+    probe:
+      httpGet:
+        path: /
+        port: 8888
+        responseHttpHeaders:
+          - name: Access-Control-Allow-Origin
+            value: "*"
+      initialDelaySeconds: 10
