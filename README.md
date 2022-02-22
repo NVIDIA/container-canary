@@ -5,7 +5,7 @@ A little bird to validate your container images.
 ```console
 $ canary validate --file somespec.yaml foo/bar:latest
 Validating foo/bar:latest against somespec
- 📦 Required packagesd are installed                 [true]
+ 📦 Required packages are installed                 [true]
  🤖 Expected services are running                    [true]
  🎉 Your container is awesome                        [true]
 PASSED
@@ -15,9 +15,9 @@ Many modern compute platforms support bring-your-own-container models where the 
 
 Container Canary is a tool for recording those requirements in a YAML manifest and then validating containers against that manifest. This is particularly useful in CI environments to avoid regressions in containers.
 
-## Example
+## Example (Kubeflow)
 
-The [Kubeflow](https://www.kubeflow.org/) documentation has a [list of requirements for container images](https://www.kubeflow.org/docs/components/notebooks/container-images/#custom-images) that can be used in the Kubeflow Notebooks service.
+The [Kubeflow](https://www.kubeflow.org/) documentation has a [list of requirements](https://www.kubeflow.org/docs/components/notebooks/container-images/#custom-images) for container images that can be used in the Kubeflow Notebooks service.
 
 That list looks like this:
 
@@ -30,7 +30,7 @@ That list looks like this:
 - start successfully with an empty PVC mounted at `/home/jovyan`:
   - kubeflow mounts a PVC at `/home/jovyan` to keep state across Pod restarts
 
-With Container Canary this list can be translated into the following YAML spec.
+With Container Canary we could write this list as the following YAML spec.
 
 ```yaml
 # examples/kubeflow.yaml
