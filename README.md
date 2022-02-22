@@ -2,6 +2,15 @@
 
 A little bird to validate your container images.
 
+```console
+$ canary validate --file somespec.yaml foo/bar:latest
+Validating foo/bar:latest against somespec
+ 📦 Required packagesd are installed                 [true]
+ 🤖 Expected services are running                    [true]
+ 🎉 Your container is awesome                        [true]
+PASSED
+```
+
 Many modern compute platforms support bring-your-own-container models where the user can provide container images with their custom software environment. However platforms commonly have a set of requirements that the container must conform to, such as using a non-root user, having the home directory in a specific location, having certain packages installed or running web applications on specific ports.
 
 Container Canary is a tool for recording those requirements in a YAML manifest and then validating containers against that manifest. This is particularly useful in CI environments to avoid regressions in containers.
@@ -110,7 +119,7 @@ This project is written in Go and uses `make` for task running.
 
 ### Building
 
-You can build Canary into `./bin/canary` with
+You can build Canary into `./bin/canary` with:
 
 ```shell
 $ make
