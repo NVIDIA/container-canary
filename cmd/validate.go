@@ -15,7 +15,7 @@ var validateCmd = &cobra.Command{
 	Short: "Validate a container against a platform",
 	Long:  ``,
 	Args:  imageArg,
-	RunE: func(cmd *cobra.Command, args []string) error {
+	Run: func(cmd *cobra.Command, args []string) {
 		file, _ := cmd.Flags().GetString("file")
 		// TODO Support loading from Url
 		// TODO Check file exists
@@ -25,13 +25,14 @@ var validateCmd = &cobra.Command{
 		v, err := validator.Validate(image, validatorConfig)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
-			return fmt.Errorf("ERRORED")
+			cmd.Println("ERRORED")
+			return
 		}
 		if !v {
-			return fmt.Errorf("FAILED")
+			cmd.Println("FAILED")
+			return
 		}
 		cmd.Println("PASSED")
-		return nil
 	},
 }
 

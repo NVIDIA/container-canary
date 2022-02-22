@@ -14,9 +14,7 @@ func TestValidate(t *testing.T) {
 	rootCmd.SetOut(b)
 	rootCmd.SetErr(b)
 	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "daskdev/dask-notebook:latest"})
-	err := rootCmd.Execute()
-
-	assert.Nil(err)
+	rootCmd.Execute()
 
 	assert.Contains(b.String(), "Validating daskdev/dask-notebook:latest against kubeflow", "did not validate")
 }

@@ -36,21 +36,21 @@ checks:
           - -c
           - "[ $HOME = /home/jovyan ]"
   - name: http
-    description: 🏠 Exposes an HTTP interface on port 8888
+    description: 🌏 Exposes an HTTP interface on port 8888
     probe:
       httpGet:
         path: /
         port: 8888
       initialDelaySeconds: 10
   - name: NB_PREFIX
-    description: 🏠 Correctly routes the NB_PREFIX
+    description: 🧭 Correctly routes the NB_PREFIX
     probe:
       httpGet:
         path: /hub/jovyan/lab
         port: 8888
       initialDelaySeconds: 10
   - name: allow-origin-all
-    description: "🏠 Sets 'Access-Control-Allow-Origin: *' header"
+    description: "🔓 Sets 'Access-Control-Allow-Origin: *' header"
     probe:
       httpGet:
         path: /
