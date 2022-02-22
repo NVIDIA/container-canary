@@ -26,7 +26,7 @@ checks:
         command:
           - /bin/sh
           - -c
-          - "[ $(id) = *uid=1000* ]"
+          - "id | grep uid=1000"
   - name: home
     description: 🏠 Home directory is /home/jovyan
     probe:
