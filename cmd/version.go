@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jacobtomlinson/containercanairy/internal"
+	"github.com/jacobtomlinson/containercanary/internal"
 	"github.com/spf13/cobra"
 )
 
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version of containercanairy",
+	Short: "Print the version of containercanary",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Container Canairy")
+		fmt.Println("Container Canary")
 		showLine("Version", internal.Version)
 		showLine("Go version", internal.GoVersion)
 		showLine("Commit", internal.Commit)

@@ -9,7 +9,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "canairy",
+	Use:   "canary",
 	Short: "A little bird to validate your containers",
 	Long: `A little bird for validating your containers can integrate with popular
 platforms. Many compute platforms have a "Bring your own container" model to allow
@@ -17,7 +17,7 @@ for customization. Container Conairy validates whether your container images wil
 be compatible with a range of platforms.
 
 Example:
-$ canairy validate kubeflow myorg/mycontainer:rev
+$ canary validate kubeflow myorg/mycontainer:rev
 
 `,
 }
@@ -37,7 +37,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.containercanairy.yaml)")
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.containercanary.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

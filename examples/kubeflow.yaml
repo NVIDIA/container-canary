@@ -1,4 +1,4 @@
-apiVersion: containercanairy.jacobtomlinson.dev/v1
+apiVersion: containercanary.jacobtomlinson.dev/v1
 kind: Validator
 name: kubeflow
 description: Kubeflow notebooks

@@ -1,7 +1,7 @@
 package checks
 
 import (
-	"github.com/jacobtomlinson/containercanairy/internal/containertools/container"
+	"github.com/jacobtomlinson/containercanary/internal/containertools/container"
 	v1 "k8s.io/api/core/v1"
 )
 

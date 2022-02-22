@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
+	"github.com/jacobtomlinson/containercanary/internal/apis/config"
 	"gopkg.in/yaml.v2"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
-	"github.com/jacobtomlinson/containercanairy/internal/containertools/container"
+	"github.com/jacobtomlinson/containercanary/internal/apis/config"
+	"github.com/jacobtomlinson/containercanary/internal/containertools/container"
 )
 
 func HTTPGetCheck(c container.Container, action *config.HTTPGetAction) (bool, error) {

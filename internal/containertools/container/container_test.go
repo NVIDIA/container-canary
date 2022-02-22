@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
+	"github.com/jacobtomlinson/containercanary/internal/apis/config"
 	v1 "k8s.io/api/core/v1"
 )
 

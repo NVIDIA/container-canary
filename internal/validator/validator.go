@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
-	"github.com/jacobtomlinson/containercanairy/internal/checks"
-	"github.com/jacobtomlinson/containercanairy/internal/containertools/container"
-	"github.com/jacobtomlinson/containercanairy/internal/terminal"
+	"github.com/jacobtomlinson/containercanary/internal/apis/config"
+	"github.com/jacobtomlinson/containercanary/internal/checks"
+	"github.com/jacobtomlinson/containercanary/internal/containertools/container"
+	"github.com/jacobtomlinson/containercanary/internal/terminal"
 )
 
 func Validate(image string, validator *config.Validator) (bool, error) { // Start image
@@ -23,6 +23,8 @@ func Validate(image string, validator *config.Validator) (bool, error) { // Star
 	}
 
 	// TODO Make checks async
+	// TODO Retry each check on fail "failureThreshold" times with "periodSeconds" sleep between
+	// TODO Retry each check on success "successThreshold" times with "periodSeconds" sleep between
 	for _, check := range validator.Checks {
 		time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
 		if check.Probe.Exec != nil {

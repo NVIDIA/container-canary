@@ -1,4 +1,4 @@
-module github.com/jacobtomlinson/containercanairy
+module github.com/jacobtomlinson/containercanary
 
 go 1.17
 

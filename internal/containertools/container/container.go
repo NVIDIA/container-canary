@@ -5,7 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/google/uuid"
-	"github.com/jacobtomlinson/containercanairy/internal/apis/config"
+	"github.com/jacobtomlinson/containercanary/internal/apis/config"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -78,6 +78,6 @@ func (c Container) Exec(command ...string) (string, error) {
 }
 
 func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []config.Volume) Container {
-	name := fmt.Sprintf("%s%s", "canairy-runner-", uuid.New().String()[:8])
+	name := fmt.Sprintf("%s%s", "canary-runner-", uuid.New().String()[:8])
 	return Container{Name: name, Image: image, Runtime: "docker", Command: "", Env: env, Ports: ports, Volumes: volumes}
 }

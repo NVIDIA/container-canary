@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/jacobtomlinson/containercanairy/internal/checks"
-	"github.com/jacobtomlinson/containercanairy/internal/config"
-	"github.com/jacobtomlinson/containercanairy/internal/validator"
+	"github.com/jacobtomlinson/containercanary/internal/checks"
+	"github.com/jacobtomlinson/containercanary/internal/config"
+	"github.com/jacobtomlinson/containercanary/internal/validator"
 	"github.com/spf13/cobra"
 )
 
