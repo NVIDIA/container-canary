@@ -5,7 +5,7 @@ A little bird to validate your container images.
 ```console
 $ canary validate --file somespec.yaml foo/bar:latest
 Validating foo/bar:latest against somespec
- 📦 Required packages are installed                 [true]
+ 📦 Required packages are installed                  [true]
  🤖 Expected services are running                    [true]
  🎉 Your container is awesome                        [true]
 PASSED
