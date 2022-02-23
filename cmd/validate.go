@@ -38,9 +38,11 @@ var validateCmd = &cobra.Command{
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
 			cmd.Println("ERRORED")
+			return nil
 		}
 		if !v {
 			cmd.Println("FAILED")
+			return nil
 		}
 		cmd.Println("PASSED")
 		return nil

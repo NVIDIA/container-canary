@@ -9,37 +9,57 @@ import (
 	"github.com/jacobtomlinson/containercanary/internal/terminal"
 )
 
+type checkResult struct {
+	Name   string
+	Passed bool
+	Error  error
+}
+
 func Validate(image string, validator *canaryv1.Validator) (bool, error) { // Start image
 	c := container.New(image, validator.Env, validator.Ports, validator.Volumes)
 	c.Start()
 	defer c.Remove()
 
-	// Run checks
-	var allChecks []bool
-
 	if len(validator.Checks) == 0 {
 		return false, fmt.Errorf("error no checks found")
 	}
 
-	// TODO Make checks async
+	allChecksPassed := true
+	results := make(chan checkResult)
+
+	// Start checks
+	for _, check := range validator.Checks {
+		go runCheck(results, &c, check)
+	}
+
+	// Wait for checks
+	for j := 1; j <= len(validator.Checks); j++ {
+		cr := <-results
+		if cr.Error != nil {
+			return false, cr.Error
+		}
+		if !cr.Passed {
+			allChecksPassed = false
+		}
+	}
+	return allChecksPassed, nil
+}
+
+func runCheck(results chan<- checkResult, c *container.Container, check canaryv1.Check) {
 	// TODO Retry each check on fail "failureThreshold" times with "periodSeconds" sleep between
 	// TODO Retry each check on success "successThreshold" times with "periodSeconds" sleep between
-	for _, check := range validator.Checks {
-		time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
-		if check.Probe.Exec != nil {
-			passFail, err := ExecCheck(c, check.Probe.Exec)
-			allChecks = append(allChecks, passFail)
-			terminal.PrintCheckItem("", check.Description, getStatus(passFail, err))
-			continue
-		}
-		if check.Probe.HTTPGet != nil {
-			passFail, err := HTTPGetCheck(c, check.Probe.HTTPGet)
-			allChecks = append(allChecks, passFail)
-			terminal.PrintCheckItem("", check.Description, getStatus(passFail, err))
-			continue
-		}
-		return false, fmt.Errorf("check '%s' has no known probes", check.Name)
+	time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
+	if check.Probe.Exec != nil {
+		p, err := ExecCheck(c, check.Probe.Exec)
+		results <- checkResult{check.Name, p, nil}
+		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
+		return
 	}
-	// Clear up container
-	return all(allChecks), nil
+	if check.Probe.HTTPGet != nil {
+		p, err := HTTPGetCheck(c, check.Probe.HTTPGet)
+		results <- checkResult{check.Name, p, nil}
+		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
+		return
+	}
+	results <- checkResult{check.Name, false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 }

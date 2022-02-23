@@ -11,12 +11,3 @@ func getStatus(check bool, err error) string {
 	}
 	return status
 }
-
-func all(bools []bool) bool {
-	for _, b := range bools {
-		if !b {
-			return false
-		}
-	}
-	return true
-}
