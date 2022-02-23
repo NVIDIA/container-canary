@@ -10,7 +10,6 @@ import (
 )
 
 type checkResult struct {
-	Name   string
 	Passed bool
 	Error  error
 }
@@ -51,15 +50,15 @@ func runCheck(results chan<- checkResult, c *container.Container, check canaryv1
 	time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
 	if check.Probe.Exec != nil {
 		p, err := ExecCheck(c, check.Probe.Exec)
-		results <- checkResult{check.Name, p, nil}
+		results <- checkResult{p, nil}
 		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
 		return
 	}
 	if check.Probe.HTTPGet != nil {
 		p, err := HTTPGetCheck(c, check.Probe.HTTPGet)
-		results <- checkResult{check.Name, p, nil}
+		results <- checkResult{p, nil}
 		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
 		return
 	}
-	results <- checkResult{check.Name, false, fmt.Errorf("check '%s' has no known probes", check.Name)}
+	results <- checkResult{false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 }
