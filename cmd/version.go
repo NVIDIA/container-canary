@@ -14,16 +14,16 @@ var versionCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Container Canary")
-		showLine("Version", internal.Version)
-		showLine("Go version", internal.GoVersion)
-		showLine("Commit", internal.Commit)
-		showLine("OS/Arch", fmt.Sprintf("%s/%s", internal.Os, internal.Arch))
-		showLine("Built", internal.Buildtime)
+		showLine(cmd, "Version", internal.Version)
+		showLine(cmd, "Go version", internal.GoVersion)
+		showLine(cmd, "Commit", internal.Commit)
+		showLine(cmd, "OS/Arch", fmt.Sprintf("%s/%s", internal.Os, internal.Arch))
+		showLine(cmd, "Built", internal.Buildtime)
 	},
 }
 
-func showLine(title string, value string) {
-	fmt.Printf(" %-16s %s\n", fmt.Sprintf("%s:", strings.Title(title)), value)
+func showLine(cmd *cobra.Command, title string, value string) {
+	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", strings.Title(title)), value)
 }
 
 func init() {
