@@ -3,7 +3,6 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/jacobtomlinson/containercanary/internal/checks"
 	"github.com/jacobtomlinson/containercanary/internal/config"
@@ -17,12 +16,15 @@ var validateCmd = &cobra.Command{
 	Long:  ``,
 	Args:  imageArg,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		file, _ := cmd.Flags().GetString("file")
-		// TODO Support loading from Url
-		if _, err := os.Stat(file); errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("no such file %s", file)
+		file, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return err
 		}
-		validatorConfig, _ := config.LoadValidatorFromFile(file)
+		// TODO Support loading from Url
+		validatorConfig, err := config.LoadValidatorFromFile(file)
+		if err != nil {
+			return err
+		}
 		image := args[0]
 		cmd.Printf("Validating %s against %s\n", image, validatorConfig.Name)
 		v, err := validator.Validate(image, validatorConfig)

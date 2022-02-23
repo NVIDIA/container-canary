@@ -1,7 +1,10 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/jacobtomlinson/containercanary/internal/apis/config"
@@ -9,12 +12,18 @@ import (
 )
 
 func LoadValidatorFromFile(path string) (*config.Validator, error) {
-	filename, _ := filepath.Abs(path)
+	filename, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := os.Stat(filename); errors.Is(err, os.ErrNotExist) {
+		return nil, fmt.Errorf("no such file %s", filename)
+	}
 
 	yamlFile, err := ioutil.ReadFile(filename)
-
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var validator config.Validator
