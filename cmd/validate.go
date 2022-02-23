@@ -3,7 +3,9 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	api "github.com/jacobtomlinson/containercanary/internal/apis/config"
 	"github.com/jacobtomlinson/containercanary/internal/checks"
 	"github.com/jacobtomlinson/containercanary/internal/config"
 	"github.com/jacobtomlinson/containercanary/internal/validator"
@@ -20,11 +22,17 @@ var validateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		// TODO Support loading from Url
-		validatorConfig, err := config.LoadValidatorFromFile(file)
+		var validatorConfig *api.Validator
+
+		if strings.Contains(file, "://") {
+			validatorConfig, err = config.LoadValidatorFromURL(file)
+		} else {
+			validatorConfig, err = config.LoadValidatorFromFile(file)
+		}
 		if err != nil {
 			return err
 		}
+
 		image := args[0]
 		cmd.Printf("Validating %s against %s\n", image, validatorConfig.Name)
 		v, err := validator.Validate(image, validatorConfig)
