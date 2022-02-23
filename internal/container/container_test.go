@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jacobtomlinson/containercanary/internal/apis/config"
+	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -15,7 +15,7 @@ func TestContainer(t *testing.T) {
 	ports := []v1.ServicePort{
 		{Port: 80, Protocol: "TCP"},
 	}
-	volumes := []config.Volume{
+	volumes := []canaryv1.Volume{
 		{MountPath: "/foo"},
 	}
 	c := New("nginx", env, ports, volumes)

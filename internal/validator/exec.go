@@ -1,7 +1,7 @@
-package checks
+package validator
 
 import (
-	"github.com/jacobtomlinson/containercanary/internal/containertools/container"
+	"github.com/jacobtomlinson/containercanary/internal/container"
 	v1 "k8s.io/api/core/v1"
 )
 

@@ -9,11 +9,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jacobtomlinson/containercanary/internal/apis/config"
+	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
 	"gopkg.in/yaml.v2"
 )
 
-func LoadValidatorFromURL(url string) (*config.Validator, error) {
+func LoadValidatorFromURL(url string) (*canaryv1.Validator, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func LoadValidatorFromURL(url string) (*config.Validator, error) {
 	return LoadValidatorFromBytes(body)
 }
 
-func LoadValidatorFromFile(path string) (*config.Validator, error) {
+func LoadValidatorFromFile(path string) (*canaryv1.Validator, error) {
 	filename, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
@@ -47,8 +47,8 @@ func LoadValidatorFromFile(path string) (*config.Validator, error) {
 	return LoadValidatorFromBytes(yamlFile)
 }
 
-func LoadValidatorFromBytes(b []byte) (*config.Validator, error) {
-	var validator config.Validator
+func LoadValidatorFromBytes(b []byte) (*canaryv1.Validator, error) {
+	var validator canaryv1.Validator
 
 	err := yaml.Unmarshal(b, &validator)
 	if err != nil {

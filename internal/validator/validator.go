@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jacobtomlinson/containercanary/internal/apis/config"
-	"github.com/jacobtomlinson/containercanary/internal/checks"
-	"github.com/jacobtomlinson/containercanary/internal/containertools/container"
+	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
+	"github.com/jacobtomlinson/containercanary/internal/container"
 	"github.com/jacobtomlinson/containercanary/internal/terminal"
 )
 
-func Validate(image string, validator *config.Validator) (bool, error) { // Start image
+func Validate(image string, validator *canaryv1.Validator) (bool, error) { // Start image
 	c := container.New(image, validator.Env, validator.Ports, validator.Volumes)
 	c.Start()
 	defer c.Remove()
@@ -28,13 +27,13 @@ func Validate(image string, validator *config.Validator) (bool, error) { // Star
 	for _, check := range validator.Checks {
 		time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
 		if check.Probe.Exec != nil {
-			passFail, err := checks.ExecCheck(c, check.Probe.Exec)
+			passFail, err := ExecCheck(c, check.Probe.Exec)
 			allChecks = append(allChecks, passFail)
 			terminal.PrintCheckItem("", check.Description, getStatus(passFail, err))
 			continue
 		}
 		if check.Probe.HTTPGet != nil {
-			passFail, err := checks.HTTPGetCheck(c, check.Probe.HTTPGet)
+			passFail, err := HTTPGetCheck(c, check.Probe.HTTPGet)
 			allChecks = append(allChecks, passFail)
 			terminal.PrintCheckItem("", check.Description, getStatus(passFail, err))
 			continue

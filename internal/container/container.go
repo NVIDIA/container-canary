@@ -5,7 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/google/uuid"
-	"github.com/jacobtomlinson/containercanary/internal/apis/config"
+	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -17,7 +17,7 @@ type Container struct {
 	Command string
 	Env     []v1.EnvVar
 	Ports   []v1.ServicePort
-	Volumes []config.Volume
+	Volumes []canaryv1.Volume
 }
 
 func (c Container) Start() error {
@@ -77,7 +77,7 @@ func (c Container) Exec(command ...string) (string, error) {
 	return string(out), err
 }
 
-func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []config.Volume) Container {
+func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []canaryv1.Volume) Container {
 	name := fmt.Sprintf("%s%s", "canary-runner-", uuid.New().String()[:8])
 	return Container{Name: name, Image: image, Runtime: "docker", Command: "", Env: env, Ports: ports, Volumes: volumes}
 }

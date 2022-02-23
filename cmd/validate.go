@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	api "github.com/jacobtomlinson/containercanary/internal/apis/config"
-	"github.com/jacobtomlinson/containercanary/internal/checks"
+	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
 	"github.com/jacobtomlinson/containercanary/internal/config"
 	"github.com/jacobtomlinson/containercanary/internal/validator"
 	"github.com/spf13/cobra"
@@ -22,7 +21,7 @@ var validateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		var validatorConfig *api.Validator
+		var validatorConfig *canaryv1.Validator
 
 		if strings.Contains(file, "://") {
 			validatorConfig, err = config.LoadValidatorFromURL(file)
@@ -59,7 +58,7 @@ func imageArg(cmd *cobra.Command, args []string) error {
 
 	image := args[0]
 
-	if checks.CheckImage(image, "docker") {
+	if validator.CheckImage(image, "docker") {
 		return nil
 	} else {
 		return fmt.Errorf("no such image: %s", image)

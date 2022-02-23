@@ -1,4 +1,4 @@
-package checks
+package validator
 
 import "os/exec"
 
