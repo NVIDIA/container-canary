@@ -10,6 +10,7 @@ import (
 
 func LoadValidatorFromFile(path string) (*config.Validator, error) {
 	filename, _ := filepath.Abs(path)
+
 	yamlFile, err := ioutil.ReadFile(filename)
 
 	if err != nil {
