@@ -1,3 +1,5 @@
+// Copyright (c) 2022, NVIDIA CORPORATION.
+
 package config
 
 import v1 "k8s.io/api/core/v1"

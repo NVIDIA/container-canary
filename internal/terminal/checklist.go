@@ -1,3 +1,5 @@
+// Copyright (c) 2022, NVIDIA CORPORATION.
+
 package terminal
 
 import (
