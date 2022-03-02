@@ -112,27 +112,3 @@ Validating public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5
  🔓 Sets 'Access-Control-Allow-Origin: *' header     [true]
 PASSED
 ```
-
-## Developing
-
-This project is written in Go and uses `make` for task running.
-
-### Building
-
-You can build Canary into `./bin/canary` with:
-
-```shell
-$ make
-go build -o bin/canary .
-```
-
-### Testing
-
-You can involve tests with:
-
-```shell
-$ make test
-go test -v ./...
-...
-PASS
-```
