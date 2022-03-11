@@ -20,7 +20,7 @@ func Validate(image string, validator *canaryv1.Validator) (bool, error) { // St
 	defer c.Remove()
 
 	if len(validator.Checks) == 0 {
-		return false, fmt.Errorf("error no checks found")
+		return false, fmt.Errorf("no checks found")
 	}
 
 	allChecksPassed := true
