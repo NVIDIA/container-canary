@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jacobtomlinson/containercanary/internal"
+	"github.com/nvidia/container-canary/internal"
 	"github.com/spf13/cobra"
 )
 

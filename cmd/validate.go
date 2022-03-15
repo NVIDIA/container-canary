@@ -22,9 +22,9 @@ import (
 	"fmt"
 	"strings"
 
-	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
-	"github.com/jacobtomlinson/containercanary/internal/config"
-	"github.com/jacobtomlinson/containercanary/internal/validator"
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
+	"github.com/nvidia/container-canary/internal/config"
+	"github.com/nvidia/container-canary/internal/validator"
 	"github.com/spf13/cobra"
 )
 

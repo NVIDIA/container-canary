@@ -4,9 +4,9 @@ COMMIT := $(shell git rev-parse --short HEAD)
 
 EXECUTABLE=canary
 
-GO_LD_FLAGS += -X github.com/jacobtomlinson/containercanary/internal.Version=$(VERSION)
-GO_LD_FLAGS += -X github.com/jacobtomlinson/containercanary/internal.Buildtime=$(BUILDTIME)
-GO_LD_FLAGS += -X github.com/jacobtomlinson/containercanary/internal.Commit=$(COMMIT)
+GO_LD_FLAGS += -X github.com/nvidia/container-canary/internal.Version=$(VERSION)
+GO_LD_FLAGS += -X github.com/nvidia/container-canary/internal.Buildtime=$(BUILDTIME)
+GO_LD_FLAGS += -X github.com/nvidia/container-canary/internal.Commit=$(COMMIT)
 GO_FLAGS = -ldflags "$(GO_LD_FLAGS)"
 
 all: test package ## Run tests and build for all platforms

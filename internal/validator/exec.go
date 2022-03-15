@@ -18,7 +18,7 @@
 package validator
 
 import (
-	"github.com/jacobtomlinson/containercanary/internal/container"
+	"github.com/nvidia/container-canary/internal/container"
 	v1 "k8s.io/api/core/v1"
 )
 

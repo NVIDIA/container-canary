@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"time"
 
-	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
-	"github.com/jacobtomlinson/containercanary/internal/container"
-	"github.com/jacobtomlinson/containercanary/internal/terminal"
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
+	"github.com/nvidia/container-canary/internal/container"
+	"github.com/nvidia/container-canary/internal/terminal"
 )
 
 type checkResult struct {

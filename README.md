@@ -34,7 +34,7 @@ With Container Canary we could write this list as the following YAML spec.
 
 ```yaml
 # examples/kubeflow.yaml
-apiVersion: containercanary.jacobtomlinson.dev/v1
+apiVersion: container-canary.nvidia.com/v1
 kind: Validator
 name: kubeflow
 description: Kubeflow notebooks

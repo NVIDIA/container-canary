@@ -1,4 +1,4 @@
-module github.com/jacobtomlinson/containercanary
+module github.com/nvidia/container-canary
 
 go 1.17
 

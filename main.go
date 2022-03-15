@@ -17,7 +17,7 @@
 
 package main
 
-import "github.com/jacobtomlinson/containercanary/cmd"
+import "github.com/nvidia/container-canary/cmd"
 
 func main() {
 	cmd.Execute()

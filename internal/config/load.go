@@ -26,7 +26,7 @@ import (
 	"os"
 	"path/filepath"
 
-	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"gopkg.in/yaml.v2"
 )
 

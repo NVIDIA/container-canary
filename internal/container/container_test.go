@@ -21,7 +21,7 @@ import (
 	"strings"
 	"testing"
 
-	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	v1 "k8s.io/api/core/v1"
 )
 

@@ -22,8 +22,8 @@ import (
 	"net/http"
 	"strings"
 
-	canaryv1 "github.com/jacobtomlinson/containercanary/internal/apis/v1"
-	"github.com/jacobtomlinson/containercanary/internal/container"
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
+	"github.com/nvidia/container-canary/internal/container"
 )
 
 func HTTPGetCheck(c *container.Container, action *canaryv1.HTTPGetAction) (bool, error) {
