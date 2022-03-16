@@ -1,0 +1,32 @@
+template: |
+  ## What’s Changed
+
+  $CHANGES
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+categories:
+  - title: "Enhancements"
+    labels:
+      - "enhancement"
+  - title: "Bug Fixes"
+    labels:
+      - "bug"
+  - title: "Documentation and code quality"
+    labels:
+      - "documentation"
+version-resolver:
+  major:
+    labels:
+      - "breaking"
+  minor:
+    labels:
+      - "enhancement"
+  patch:
+    labels:
+      - "bug"
+  default: patch
+autolabeler:
+  - label: "documentation"
+    files:
+      - "*.md"
