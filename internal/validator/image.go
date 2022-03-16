@@ -21,5 +21,12 @@ import "os/exec"
 
 func CheckImage(image string, runtime string) bool {
 	cmd := exec.Command(runtime, "image", "inspect", image)
-	return cmd.Run() == nil
+	err := cmd.Run()
+
+	if err == nil {
+		return true
+	} else {
+		cmd = exec.Command(runtime, "pull", image)
+		return cmd.Run() == nil
+	}
 }
