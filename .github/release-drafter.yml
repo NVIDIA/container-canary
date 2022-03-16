@@ -1,10 +1,6 @@
-template: |
-  ## What’s Changed
-
-  $CHANGES
-change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
+change-template: "- $TITLE @$AUTHOR (#$NUMBER)"
 categories:
   - title: "Enhancements"
     labels:
@@ -30,3 +26,40 @@ autolabeler:
   - label: "documentation"
     files:
       - "*.md"
+template: |
+  ## What’s Changed
+
+  $CHANGES
+
+  ## Installation
+
+  Download the appropriate binary for your system.
+
+  ```console
+  $ curl -L https://github.com/NVIDIA/container-canary/releases/download/v$RESOLVED_VERSION/canary_linux_amd64 > canary_linux_amd64
+  ```
+
+  Download and verify the SHA256 hash.
+
+  ```console
+  $ curl -L https://github.com/NVIDIA/container-canary/releases/download/v$RESOLVED_VERSION/canary_linux_amd64.sha256sum > canary_linux_amd64.sha256sum
+
+  $ sha256sum --check --status canary_linux_amd64.sha256sum
+  ```
+
+  Install the binary somewhere on your path.
+
+  ```console
+  $ chmod +x canary_linux_amd64
+
+  $ mv canary_linux_amd64 /usr/local/bin/canary
+  ```
+
+  Verify things are working.
+
+  ```console
+  $ canary version
+  Container Canary
+  Version:         v$RESOLVED_VERSION
+  ...
+  ```

@@ -29,6 +29,10 @@ type Validator struct {
 	// +optional
 	Description string
 
+	// A link to the documentation where the requirements are defined.
+	// +optional
+	Documentation string
+
 	// A list of checks to perform validation against.
 	Checks []Check
 
