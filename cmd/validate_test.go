@@ -38,12 +38,7 @@ func TestValidate(t *testing.T) {
 
 func TestFileDoesNotExist(t *testing.T) {
 	assert := assert.New(t)
-
-	b := new(bytes.Buffer)
-	rootCmd.SetOut(b)
-	rootCmd.SetErr(b)
 	rootCmd.SetArgs([]string{"validate", "--file", "foo.yaml", "nginx"})
-	rootCmd.Execute()
-
-	assert.Contains(b.String(), "Error", "did not error")
+	err := rootCmd.Execute()
+	assert.NotNil(err, "did not error")
 }
