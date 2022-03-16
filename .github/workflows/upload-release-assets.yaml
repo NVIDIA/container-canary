@@ -1,0 +1,33 @@
+on:
+  release:
+    types:
+      - published
+
+name: Upload Release Assets
+
+jobs:
+  build:
+    name: Upload Release Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.17.x"
+      - name: Build binaries
+        run: |
+          make package
+      - name: Calculate hashes
+        run: |
+          cd bin
+          for f in canary_*; do
+              shasum -a 256 "$f" > "$f".sha256sum;
+          done
+      - name: Upload
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag_name="${GITHUB_REF##*/}"
+          hub release edit $(find . -type f -name "bin/canary_*" -printf "-a %p ") -m "" "$tag_name"
