@@ -17,16 +17,21 @@
 
 package validator
 
-import "os/exec"
+import (
+	"os/exec"
 
-func CheckImage(image string, runtime string) bool {
-	cmd := exec.Command(runtime, "image", "inspect", image)
-	err := cmd.Run()
+	"github.com/spf13/cobra"
+)
+
+func CheckImage(cmd *cobra.Command, image string, runtime string) bool {
+	command := exec.Command(runtime, "image", "inspect", image)
+	err := command.Run()
 
 	if err == nil {
 		return true
 	} else {
-		cmd = exec.Command(runtime, "pull", image)
-		return cmd.Run() == nil
+		cmd.Printf("Cannot find %s, pulling...", image)
+		command = exec.Command(runtime, "pull", image)
+		return command.Run() == nil
 	}
 }

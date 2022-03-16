@@ -77,7 +77,7 @@ func imageArg(cmd *cobra.Command, args []string) error {
 
 	image := args[0]
 
-	if validator.CheckImage(image, "docker") {
+	if validator.CheckImage(cmd, image, "docker") {
 		return nil
 	} else {
 		return fmt.Errorf("no such image: %s", image)
