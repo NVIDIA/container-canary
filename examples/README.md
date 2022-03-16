@@ -13,7 +13,7 @@ Validating public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5
  🌏 Exposes an HTTP interface on port 8888           [true]
  🧭 Correctly routes the NB_PREFIX                   [true]
  🔓 Sets 'Access-Control-Allow-Origin: *' header     [true]
-PASSED
+validation passed
 ```
 
 [Contributing](../CONTRIBUTING.md) more manifests here is highly encouraged!

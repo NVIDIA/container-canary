@@ -12,7 +12,7 @@ Validating foo/bar:latest against somespec
  📦 Required packages are installed                  [true]
  🤖 Expected services are running                    [true]
  🎉 Your container is awesome                        [true]
-PASSED
+validation passed
 ```
 
 Many modern compute platforms support bring-your-own-container models where the user can provide container images with their custom software environment. However platforms commonly have a set of requirements that the container must conform to, such as using a non-root user, having the home directory in a specific location, having certain packages installed or running web applications on specific ports.
@@ -135,7 +135,7 @@ Validating public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5
  🌏 Exposes an HTTP interface on port 8888           [true]
  🧭 Correctly routes the NB_PREFIX                   [true]
  🔓 Sets 'Access-Control-Allow-Origin: *' header     [true]
-PASSED
+validation passed
 ```
 
 For more examples [see the examples directory](examples/).
