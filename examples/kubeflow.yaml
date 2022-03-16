@@ -2,6 +2,7 @@ apiVersion: container-canary.nvidia.com/v1
 kind: Validator
 name: kubeflow
 description: Kubeflow notebooks
+documentation: https://www.kubeflow.org/docs/components/notebooks/container-images/#custom-images
 env:
   - name: NB_PREFIX
     value: /hub/jovyan/

@@ -15,6 +15,10 @@ Many modern compute platforms support bring-your-own-container models where the 
 
 Container Canary is a tool for recording those requirements in a YAML manifest and then validating containers against that manifest. This is particularly useful in CI environments to avoid regressions in containers.
 
+## Installation
+
+You can find binaries and instructions on [our releases page](https://github.com/NVIDIA/container-canary/releases).
+
 ## Example (Kubeflow)
 
 The [Kubeflow](https://www.kubeflow.org/) documentation has a [list of requirements](https://www.kubeflow.org/docs/components/notebooks/container-images/#custom-images) for container images that can be used in the Kubeflow Notebooks service.
@@ -112,3 +116,5 @@ Validating public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5
  🔓 Sets 'Access-Control-Allow-Origin: *' header     [true]
 PASSED
 ```
+
+For more examples [see the examples directory](examples/).
