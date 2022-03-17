@@ -29,14 +29,19 @@ import (
 )
 
 var validateCmd = &cobra.Command{
-	Use:   "validate [IMAGE]",
-	Short: "Validate a container against a platform",
-	Long:  ``,
-	Args:  imageArg,
+	Use:           "validate [IMAGE]",
+	Short:         "Validate a container against a platform",
+	Long:          ``,
+	Args:          imageArg,
+	SilenceUsage:  true,
+	SilenceErrors: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		file, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return err
+		}
+		if file == "" {
+			return errors.New("you must specify a manifest with '--file path/url'")
 		}
 		var validatorConfig *canaryv1.Validator
 
@@ -54,14 +59,12 @@ var validateCmd = &cobra.Command{
 		v, err := validator.Validate(image, validatorConfig)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
-			cmd.Println("ERRORED")
-			return nil
+			return errors.New("validation errored")
 		}
 		if !v {
-			cmd.Println("FAILED")
-			return nil
+			return errors.New("validation failed")
 		}
-		cmd.Println("PASSED")
+		cmd.Println("validation passed")
 		return nil
 	},
 }
