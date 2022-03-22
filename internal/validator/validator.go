@@ -72,7 +72,7 @@ func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, d
 			allChecksPassed = false
 		}
 	}
-	if debug {
+	if debug && !allChecksPassed {
 		done := make(chan os.Signal, 1)
 		signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
 		cmd.Println("Leaving container running for debugging, press ctrl+c to exit...")
