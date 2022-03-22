@@ -28,6 +28,7 @@ Container Canary is a tool for recording those requirements as a manifest that c
       - [Environment variables](#environment-variables)
       - [Ports](#ports)
       - [Volumes](#volumes)
+      - [Command](#command)
     - [Checks](#checks)
       - [Exec](#exec)
       - [HTTPGet](#httpget)
@@ -192,6 +193,14 @@ Volumes to be mounted to the container. This is useful if the compute platform w
 ```yaml
 volumes:
   - mountPath: /home/jovyan
+```
+
+#### Command
+
+You can specify a custom command to be run inside the container.
+
+```yaml
+command: foo
 ```
 
 ### Checks
