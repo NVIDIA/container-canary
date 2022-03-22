@@ -56,7 +56,11 @@ var validateCmd = &cobra.Command{
 
 		image := args[0]
 		cmd.Printf("Validating %s against %s\n", image, validatorConfig.Name)
-		v, err := validator.Validate(image, validatorConfig)
+		debug, err := cmd.Flags().GetBool("debug")
+		if err != nil {
+			return err
+		}
+		v, err := validator.Validate(image, validatorConfig, cmd, debug)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
 			return errors.New("validation errored")
@@ -90,5 +94,6 @@ func imageArg(cmd *cobra.Command, args []string) error {
 func init() {
 	rootCmd.AddCommand(validateCmd)
 	validateCmd.PersistentFlags().String("file", "", "Path or URL of a manifest to validate against.")
+	validateCmd.PersistentFlags().Bool("debug", false, "Keep container running on failure for debugging.")
 
 }

@@ -19,11 +19,15 @@ package validator
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
 	"github.com/nvidia/container-canary/internal/terminal"
+	"github.com/spf13/cobra"
 )
 
 type checkResult struct {
@@ -31,9 +35,19 @@ type checkResult struct {
 	Error  error
 }
 
-func Validate(image string, validator *canaryv1.Validator) (bool, error) { // Start image
-	c := container.New(image, validator.Env, validator.Ports, validator.Volumes)
-	c.Start()
+func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, debug bool) (bool, error) { // Start image
+	c := container.New(image, validator.Env, validator.Ports, validator.Volumes, validator.Command)
+	err := c.Start()
+	if err != nil {
+		logs, logsErr := c.Logs()
+		if logsErr == nil {
+			cmd.Print(logs)
+		} else {
+			cmd.Println("Unable to get logs")
+			cmd.Println(logsErr)
+		}
+		return false, err
+	}
 	defer c.Remove()
 
 	if len(validator.Checks) == 0 {
@@ -57,6 +71,12 @@ func Validate(image string, validator *canaryv1.Validator) (bool, error) { // St
 		if !cr.Passed {
 			allChecksPassed = false
 		}
+	}
+	if debug {
+		done := make(chan os.Signal, 1)
+		signal.Notify(done, syscall.SIGINT, syscall.SIGTERM)
+		cmd.Println("Leaving container running for debugging, press ctrl+c to exit...")
+		<-done
 	}
 	return allChecksPassed, nil
 }
