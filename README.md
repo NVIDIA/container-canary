@@ -200,7 +200,9 @@ volumes:
 You can specify a custom command to be run inside the container.
 
 ```yaml
-command: foo
+command:
+ - foo
+ - --bar=true
 ```
 
 ### Checks
