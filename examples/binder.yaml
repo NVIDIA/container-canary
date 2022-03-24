@@ -1,0 +1,55 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: binder
+description: Binder
+documentation: https://mybinder.readthedocs.io/en/latest/tutorials/dockerfile.html#preparing-your-dockerfile
+env: []
+ports:
+  - port: 8888
+    protocol: TCP
+volumes: []
+command:
+  - jupyter
+  - lab
+  - --ip=0.0.0.0
+  - --port=8888
+checks:
+  - name: jupyter
+    description: 🖥 Has jupyter installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which jupyter"
+  - name: user
+    description: 👩 User is jovyan
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $(whoami) = jovyan ]"
+  - name: uid
+    description: 🆔 User ID is 1000
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "id | grep uid=1000"
+  - name: home
+    description: 🏠 Home directory is /home/jovyan
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $HOME = /home/jovyan ]"
+  - name: http
+    description: 🌏 Starts Jupyter on port 8888
+    probe:
+      httpGet:
+        path: /
+        port: 8888
+      initialDelaySeconds: 10
