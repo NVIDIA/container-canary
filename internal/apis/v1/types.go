@@ -47,7 +47,7 @@ type Validator struct {
 
 	// A command to run in the container
 	// +optional
-	Command string
+	Command []string
 }
 
 type Check struct {

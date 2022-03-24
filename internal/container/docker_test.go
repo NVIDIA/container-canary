@@ -22,10 +22,12 @@ import (
 	"testing"
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
 
-func TestContainer(t *testing.T) {
+func TestDockerContainer(t *testing.T) {
+	assert := assert.New(t)
 	env := []v1.EnvVar{
 		{Name: "FOO", Value: "BAR"},
 	}
@@ -35,7 +37,7 @@ func TestContainer(t *testing.T) {
 	volumes := []canaryv1.Volume{
 		{MountPath: "/foo"},
 	}
-	c := New("nginx", env, ports, volumes, "")
+	c := New("nginx", env, ports, volumes, nil)
 
 	err := c.Start()
 	defer c.Remove()
@@ -43,10 +45,11 @@ func TestContainer(t *testing.T) {
 		t.Errorf("Failed to start container: %s", err.Error())
 	}
 
-	_, err = c.Status()
+	status, err := c.Status()
 	if err != nil {
 		t.Errorf("Failed to inspect container: %s", err.Error())
 	}
+	assert.Contains(status.RunCommand, "docker run", "Run command not stored correctly")
 
 	uname, err := c.Exec("uname", "-a")
 	if err != nil {
@@ -56,8 +59,8 @@ func TestContainer(t *testing.T) {
 		t.Error("Output for command 'uname' did not contain expected string 'Linux'")
 	}
 }
-func TestContainerRemoves(t *testing.T) {
-	c := New("nginx", nil, nil, nil, "")
+func TestDockerContainerRemoves(t *testing.T) {
+	c := New("nginx", nil, nil, nil, nil)
 
 	err := c.Start()
 	if err != nil {
