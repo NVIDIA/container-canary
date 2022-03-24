@@ -38,6 +38,11 @@ type checkResult struct {
 func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, debug bool) (bool, error) { // Start image
 	c := container.New(image, validator.Env, validator.Ports, validator.Volumes, validator.Command)
 	err := c.Start()
+	defer c.Remove()
+	if debug {
+		status, _ := c.Status()
+		cmd.Printf("Running container with command '%s'\n", status.RunCommand)
+	}
 	if err != nil {
 		logs, logsErr := c.Logs()
 		if logsErr == nil {
@@ -48,7 +53,6 @@ func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, d
 		}
 		return false, err
 	}
-	defer c.Remove()
 
 	if len(validator.Checks) == 0 {
 		return false, fmt.Errorf("no checks found")
@@ -59,7 +63,7 @@ func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, d
 
 	// Start checks
 	for _, check := range validator.Checks {
-		go runCheck(results, &c, check)
+		go runCheck(results, c, check)
 	}
 
 	// Wait for checks
@@ -81,7 +85,7 @@ func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, d
 	return allChecksPassed, nil
 }
 
-func runCheck(results chan<- checkResult, c *container.Container, check canaryv1.Check) {
+func runCheck(results chan<- checkResult, c container.ContainerInterface, check canaryv1.Check) {
 	// TODO Retry each check on fail "failureThreshold" times with "periodSeconds" sleep between
 	// TODO Retry each check on success "successThreshold" times with "periodSeconds" sleep between
 	time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
