@@ -97,7 +97,7 @@ func runCheck(results chan<- checkResult, c container.ContainerInterface, check 
 		results <- checkResult{false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 		return
 	}
-	results <- checkResult{p, nil}
+	results <- checkResult{p, err}
 	terminal.PrintCheckItem("", check.Description, getStatus(p, err))
 }
 
