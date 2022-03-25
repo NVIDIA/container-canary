@@ -74,11 +74,31 @@ type Probe struct {
 
 	FailureThreshold int `yaml:"failureThreshold"`
 
-	TerminationGracePeriodSeconds *int `yaml:"terminationGracePeriodSeconds"`
+	TerminationGracePeriodSeconds int `yaml:"terminationGracePeriodSeconds"`
 
 	Exec *v1.ExecAction `yaml:"exec"`
 
 	HTTPGet *HTTPGetAction `yaml:"httpGet"`
+
+	TCPSocket *TCPSocketAction `yaml:"tcpSocket" `
+}
+
+func (p *Probe) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type rawProbe Probe
+	raw := rawProbe{
+		InitialDelaySeconds:           0,
+		TimeoutSeconds:                30,
+		PeriodSeconds:                 1,
+		SuccessThreshold:              1,
+		FailureThreshold:              1,
+		TerminationGracePeriodSeconds: 30,
+	}
+	if err := unmarshal(&raw); err != nil {
+		return err
+	}
+
+	*p = Probe(raw)
+	return nil
 }
 
 type HTTPGetAction struct {
@@ -88,10 +108,6 @@ type HTTPGetAction struct {
 	// Number of the port to access on the container.
 	// Number must be in the range 1 to 65535.
 	Port int `json:"port"`
-	// Host name to connect to, defaults to the pod IP. You probably want to set
-	// "Host" in httpHeaders instead.
-	// +optional
-	Host string `json:"host,omitempty"`
 	// Scheme to use for connecting to the host.
 	// Defaults to HTTP.
 	// +optional
@@ -102,6 +118,12 @@ type HTTPGetAction struct {
 	// Headers expected in the response. Check will fail if any are missing.
 	// +optional
 	ResponseHTTPHeaders []v1.HTTPHeader `json:"responseHttpHeaders,omitempty"`
+}
+
+type TCPSocketAction struct {
+	// Number or name of the port to access on the container.
+	// Number must be in the range 1 to 65535.
+	Port int `json:"port"`
 }
 
 type Volume struct {

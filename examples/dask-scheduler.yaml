@@ -1,0 +1,26 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: dask-scheduler
+description: Dask Scheduler
+documentation:
+command:
+  - dask-scheduler
+ports:
+  - port: 8786
+    protocol: TCP
+  - port: 8787
+    protocol: TCP
+checks:
+  - name: dashboard
+    description: 🌏 Exposes the Dashboard on port 8787
+    probe:
+      httpGet:
+        path: /
+        port: 8787
+      failureThreshold: 30
+  - name: comm
+    description: ⛓ Exposes Dask comm on port 8786
+    probe:
+      tcpSocket:
+        port: 8786
+      failureThreshold: 30
