@@ -26,7 +26,8 @@ import (
 	"github.com/nvidia/container-canary/internal/container"
 )
 
-func HTTPGetCheck(c container.ContainerInterface, action *canaryv1.HTTPGetAction) (bool, error) {
+func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+	action := probe.HTTPGet
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", action.Port, action.Path), nil)
 	if err != nil {

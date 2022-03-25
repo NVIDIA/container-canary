@@ -86,20 +86,47 @@ func Validate(image string, validator *canaryv1.Validator, cmd *cobra.Command, d
 }
 
 func runCheck(results chan<- checkResult, c container.ContainerInterface, check canaryv1.Check) {
-	// TODO Retry each check on fail "failureThreshold" times with "periodSeconds" sleep between
-	// TODO Retry each check on success "successThreshold" times with "periodSeconds" sleep between
-	time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
+	var p bool
+	var err error
+	// TODO Make more SOLID (O)
 	if check.Probe.Exec != nil {
-		p, err := ExecCheck(c, check.Probe.Exec)
-		results <- checkResult{p, nil}
-		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
+		p, err = executeCheck(ExecCheck, c, &check.Probe)
+	} else if check.Probe.HTTPGet != nil {
+		p, err = executeCheck(HTTPGetCheck, c, &check.Probe)
+	} else {
+		results <- checkResult{false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 		return
 	}
-	if check.Probe.HTTPGet != nil {
-		p, err := HTTPGetCheck(c, check.Probe.HTTPGet)
-		results <- checkResult{p, nil}
-		terminal.PrintCheckItem("", check.Description, getStatus(p, err))
-		return
+	results <- checkResult{p, err}
+	terminal.PrintCheckItem("", check.Description, getStatus(p, err))
+}
+
+type probeCallable func(container.ContainerInterface, *canaryv1.Probe) (bool, error)
+
+// Run a check method with appropriate delay, retries and retry interval
+func executeCheck(method probeCallable, c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+	time.Sleep(time.Duration(probe.InitialDelaySeconds) * time.Second)
+	passes := 0
+	fails := 0
+	start := time.Now()
+	for {
+		passFail, err := method(c, probe)
+		if err != nil {
+			return false, err
+		}
+		if passFail {
+			passes += 1
+			fails = 0
+		} else {
+			fails += 1
+			passes = 0
+		}
+		if passes >= probe.SuccessThreshold || fails >= probe.FailureThreshold {
+			return passFail, err
+		}
+		if time.Since(start) > time.Duration(probe.TimeoutSeconds)*time.Second {
+			return false, fmt.Errorf("check timed out after %d seconds", probe.TimeoutSeconds)
+		}
+		time.Sleep(time.Duration(probe.PeriodSeconds) * time.Second)
 	}
-	results <- checkResult{false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 }
