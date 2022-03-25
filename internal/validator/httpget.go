@@ -31,7 +31,6 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", action.Port, action.Path), nil)
 	if err != nil {
-		// fmt.Println(err.Error())
 		return false, nil
 	}
 	req.Close = true
@@ -41,7 +40,6 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		// fmt.Println(err.Error())
 		return false, nil
 	}
 	for _, header := range action.ResponseHTTPHeaders {

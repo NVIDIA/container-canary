@@ -123,7 +123,7 @@ func executeCheck(method probeCallable, c container.ContainerInterface, probe *c
 			fails += 1
 			passes = 0
 		}
-		if passes > probe.SuccessThreshold || fails > probe.FailureThreshold {
+		if passes >= probe.SuccessThreshold || fails >= probe.FailureThreshold {
 			return passFail, err
 		}
 		if time.Since(start) > time.Duration(probe.TimeoutSeconds)*time.Second {
