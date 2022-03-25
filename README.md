@@ -32,6 +32,7 @@ Container Canary is a tool for recording those requirements as a manifest that c
     - [Checks](#checks)
       - [Exec](#exec)
       - [HTTPGet](#httpget)
+      - [TCPSocket](#tcpsocket)
       - [Delays, timeouts, periods and thresholds](#delays-timeouts-periods-and-thresholds)
   - [Contributing](#contributing)
   - [Maintaining](#maintaining)
@@ -251,6 +252,19 @@ checks:
         responseHttpHeaders:  # Optional, headers that you expect to see in the response
           - name: Access-Control-Allow-Origin
             value: "*"
+```
+
+#### TCPSocket
+
+A TCP Socket check will ensure something is listening on a specific TCP port.
+
+```yaml
+checks:
+  - name: tcp
+    description: Is listening via TCP on port 80
+    probe:
+      tcpSocket:
+        port: 80
 ```
 
 #### Delays, timeouts, periods and thresholds

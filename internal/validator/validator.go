@@ -93,6 +93,8 @@ func runCheck(results chan<- checkResult, c container.ContainerInterface, check 
 		p, err = executeCheck(ExecCheck, c, &check.Probe)
 	} else if check.Probe.HTTPGet != nil {
 		p, err = executeCheck(HTTPGetCheck, c, &check.Probe)
+	} else if check.Probe.TCPSocket != nil {
+		p, err = executeCheck(TCPSocketCheck, c, &check.Probe)
 	} else {
 		results <- checkResult{false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 		return
