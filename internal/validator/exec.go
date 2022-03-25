@@ -18,11 +18,12 @@
 package validator
 
 import (
+	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
-	v1 "k8s.io/api/core/v1"
 )
 
-func ExecCheck(c container.ContainerInterface, action *v1.ExecAction) (bool, error) {
+func ExecCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+	action := probe.Exec
 	_, err := c.Exec(action.Command...)
 	if err != nil {
 		return false, nil

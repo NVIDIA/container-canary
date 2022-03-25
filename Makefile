@@ -32,8 +32,9 @@ test: ## Run tests
 version:
 	@echo version: $(VERSION)
 
-clean: ## Remove previous builds
+clean: ## Remove previous builds and clear test cache
 	rm -f bin/$(EXECUTABLE)*
+	go clean -testcache
 
 help: ## Display available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

@@ -42,14 +42,14 @@ checks:
       httpGet:
         path: /
         port: 8888
-      initialDelaySeconds: 10
+      failureThreshold: 30
   - name: NB_PREFIX
     description: 🧭 Correctly routes the NB_PREFIX
     probe:
       httpGet:
         path: /hub/jovyan/lab
         port: 8888
-      initialDelaySeconds: 10
+      failureThreshold: 30
   - name: allow-origin-all
     description: "🔓 Sets 'Access-Control-Allow-Origin: *' header"
     probe:
@@ -59,4 +59,4 @@ checks:
         responseHttpHeaders:
           - name: Access-Control-Allow-Origin
             value: "*"
-      initialDelaySeconds: 10
+      failureThreshold: 30
