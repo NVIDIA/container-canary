@@ -30,15 +30,15 @@ func TestValidate(t *testing.T) {
 	b := new(bytes.Buffer)
 	rootCmd.SetOut(b)
 	rootCmd.SetErr(b)
-	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "daskdev/dask-notebook:latest"})
+	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/kubeflow:shouldpass"})
 	rootCmd.Execute()
 
-	assert.Contains(b.String(), "Validating daskdev/dask-notebook:latest against kubeflow", "did not validate")
+	assert.Contains(b.String(), "Validating container-canary/kubeflow:shouldpass against kubeflow", "did not validate")
 }
 
 func TestFileDoesNotExist(t *testing.T) {
 	assert := assert.New(t)
-	rootCmd.SetArgs([]string{"validate", "--file", "foo.yaml", "nginx"})
+	rootCmd.SetArgs([]string{"validate", "--file", "foo.yaml", "container-canary/kubeflow:shouldpass"})
 	err := rootCmd.Execute()
 	assert.NotNil(err, "did not error")
 }
