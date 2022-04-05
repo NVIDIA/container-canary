@@ -21,5 +21,4 @@ jobs:
         run: make testprep
 
       - name: Run tests
-        shell: 'script -q -e -c "bash {0}"'
         run: make test

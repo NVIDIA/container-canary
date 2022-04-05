@@ -216,7 +216,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 	p := tea.NewProgram(m, tea.WithInput(cmd.InOrStdin()), tea.WithOutput(cmd.OutOrStdout()))
 	out, err := p.StartReturningModel()
 	if err != nil {
-		return false, errors.New("could not start program")
+		return false, err
 	}
 	if out, ok := out.(model); ok {
 		return out.allChecksPassed, out.err
