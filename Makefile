@@ -29,6 +29,9 @@ package: ## Build for all platforms
 test: ## Run tests
 	go test -v ./...
 
+testprep: ## Run test prerequisite tasks
+	docker build -t container-canary/kubeflow:shouldpass -f internal/testdata/containers/kubeflow.Dockerfile .
+
 version:
 	@echo version: $(VERSION)
 
