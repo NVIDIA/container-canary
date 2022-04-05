@@ -17,7 +17,17 @@ go build -o bin/canary .
 
 ### Testing
 
-You can invoke tests with:
+Tests require some example containers to use. Before you run the tests you must build them.
+
+```console
+$ make testprep
+docker build -t container-canary/kubeflow:shouldpass -f internal/testdata/containers/kubeflow.Dockerfile .
+[+] Building 1.7s (10/10) FINISHED
+...
+ => => naming to docker.io/container-canary/kubeflow:shouldpass
+ ```
+
+You can then invoke tests with:
 
 ```shell
 $ make test
