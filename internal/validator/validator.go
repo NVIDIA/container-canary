@@ -219,7 +219,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		return false, errors.New("could not start program")
 	}
 	if out, ok := out.(model); ok {
-		return out.allChecksPassed, m.err
+		return out.allChecksPassed, out.err
 	} else {
 		return false, errors.New("program returned unknown model")
 	}
