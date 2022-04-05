@@ -20,10 +20,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"strings"
 
-	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
-	"github.com/nvidia/container-canary/internal/config"
 	"github.com/nvidia/container-canary/internal/validator"
 	"github.com/spf13/cobra"
 )
@@ -43,24 +40,14 @@ var validateCmd = &cobra.Command{
 		if file == "" {
 			return errors.New("you must specify a manifest with '--file path/url'")
 		}
-		var validatorConfig *canaryv1.Validator
-
-		if strings.Contains(file, "://") {
-			validatorConfig, err = config.LoadValidatorFromURL(file)
-		} else {
-			validatorConfig, err = config.LoadValidatorFromFile(file)
-		}
-		if err != nil {
-			return err
-		}
 
 		image := args[0]
-		cmd.Printf("Validating %s against %s\n", image, validatorConfig.Name)
 		debug, err := cmd.Flags().GetBool("debug")
 		if err != nil {
 			return err
 		}
-		v, err := validator.Validate(image, validatorConfig, cmd, debug)
+
+		v, err := validator.Validate(image, file, cmd, debug)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
 			return errors.New("validation errored")
@@ -68,7 +55,6 @@ var validateCmd = &cobra.Command{
 		if !v {
 			return errors.New("validation failed")
 		}
-		cmd.Println("validation passed")
 		return nil
 	},
 }

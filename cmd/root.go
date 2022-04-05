@@ -18,7 +18,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -44,7 +43,6 @@ $ canary validate kubeflow myorg/mycontainer:rev
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
-		fmt.Println(err.Error())
 		os.Exit(1)
 	}
 }
