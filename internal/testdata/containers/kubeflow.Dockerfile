@@ -13,4 +13,4 @@ ENV PATH=/home/jovyan/.local/bin:$PATH
 
 RUN pip install jupyterlab
 
-CMD jupyter lab
+CMD jupyter lab --ip=0.0.0.0
