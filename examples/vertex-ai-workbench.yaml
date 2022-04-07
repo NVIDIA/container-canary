@@ -4,8 +4,8 @@ name: vertex-ai-workbench
 description: Vertex AI Workbench
 command: ["sleep", "60"]
 checks:
-  - name: jupyter-kernelspec
-    description: Can run list Jupyter kernels
+  - name: jupyter-kernelspec-list
+    description: Can list Jupyter kernels
     probe:
       exec:
         command: ["jupyter", "kernelspec", "list", "--json"]
