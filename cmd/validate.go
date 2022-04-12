@@ -50,7 +50,7 @@ var validateCmd = &cobra.Command{
 		v, err := validator.Validate(image, file, cmd, debug)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
-			return errors.New("validation errored")
+			return err
 		}
 		if !v {
 			return errors.New("validation failed")
