@@ -18,8 +18,10 @@
 package cmd
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,6 +30,10 @@ func TestValidate(t *testing.T) {
 	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/kubeflow:shouldpass"})
 	err := rootCmd.Execute()
 	assert.Nil(err, "should not error")
+	if err != nil {
+		err = errors.WithStack(err)
+		fmt.Printf("%v", err)
+	}
 }
 
 func TestFileDoesNotExist(t *testing.T) {
