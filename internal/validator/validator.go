@@ -18,8 +18,10 @@
 package validator
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -218,7 +220,12 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		debug:            debug,
 		image:            image,
 	}
-	p := tea.NewProgram(m, tea.WithInput(os.Stdin))
+	var tty io.Reader
+	tty, err := os.Open("/dev/tty")
+	if err != nil {
+		tty = bufio.NewReader(os.Stdin)
+	}
+	p := tea.NewProgram(m, tea.WithInput(tty))
 	out, err := p.StartReturningModel()
 	if err != nil {
 		return false, err
