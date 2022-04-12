@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,8 +30,7 @@ func TestValidate(t *testing.T) {
 	err := rootCmd.Execute()
 	assert.Nil(err, "should not error")
 	if err != nil {
-		err = errors.WithStack(err)
-		fmt.Printf("%v", err)
+		fmt.Printf("%+v", err)
 	}
 }
 
