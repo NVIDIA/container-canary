@@ -21,5 +21,4 @@ jobs:
         run: make testprep
 
       - name: Run tests
-        shell: /bin/bash -e {0}
         run: make test
