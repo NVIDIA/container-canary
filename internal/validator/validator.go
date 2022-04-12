@@ -18,10 +18,8 @@
 package validator
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -93,7 +91,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			m.quitting = true
 			m.allChecksPassed = false
-			return m, shutdown(m.container)
+			if m.containerStarted {
+				return m, startContainer(m.image, m.validator)
+			} else {
+				return m, tea.Quit
+			}
 		default:
 			return m, nil
 		}
@@ -216,12 +218,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		debug:            debug,
 		image:            image,
 	}
-	var tty io.Reader
-	tty, err := os.Open("/dev/tty")
-	if err != nil {
-		tty = bufio.NewReader(os.Stdin)
-	}
-	p := tea.NewProgram(m, tea.WithInput(tty))
+	p := tea.NewProgram(m, tea.WithInput(os.Stdin))
 	out, err := p.StartReturningModel()
 	if err != nil {
 		return false, err
