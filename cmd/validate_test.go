@@ -18,7 +18,7 @@
 package cmd
 
 import (
-	"bytes"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,14 +26,12 @@ import (
 
 func TestValidate(t *testing.T) {
 	assert := assert.New(t)
-
-	b := new(bytes.Buffer)
-	rootCmd.SetOut(b)
-	rootCmd.SetErr(b)
 	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/kubeflow:shouldpass"})
-	rootCmd.Execute()
-
-	assert.Contains(b.String(), "Validating container-canary/kubeflow:shouldpass against kubeflow", "did not validate")
+	err := rootCmd.Execute()
+	assert.Nil(err, "should not error")
+	if err != nil {
+		fmt.Printf("%+v", err)
+	}
 }
 
 func TestFileDoesNotExist(t *testing.T) {
