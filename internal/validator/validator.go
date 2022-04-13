@@ -225,7 +225,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 	if err != nil {
 		tty = bufio.NewReader(os.Stdin)
 	}
-	p := tea.NewProgram(m, tea.WithInput(tty))
+	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.StartReturningModel()
 	if err != nil {
 		return false, err
