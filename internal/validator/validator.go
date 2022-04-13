@@ -94,7 +94,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 			m.allChecksPassed = false
 			if m.containerStarted {
-				return m, startContainer(m.image, m.validator)
+				return m, shutdown(m.container)
 			} else {
 				return m, tea.Quit
 			}
