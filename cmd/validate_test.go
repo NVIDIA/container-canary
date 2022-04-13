@@ -18,7 +18,7 @@
 package cmd
 
 import (
-	"fmt"
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,17 +26,37 @@ import (
 
 func TestValidate(t *testing.T) {
 	assert := assert.New(t)
+	b := new(bytes.Buffer)
+	rootCmd.SetOut(b)
+	rootCmd.SetErr(b)
 	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/kubeflow:shouldpass"})
 	err := rootCmd.Execute()
+
 	assert.Nil(err, "should not error")
-	if err != nil {
-		fmt.Printf("%+v", err)
-	}
+	assert.Contains(b.String(), "Validating container-canary/kubeflow:shouldpass against kubeflow", "did not validate")
+	assert.Contains(b.String(), "validation passed", "did not pass")
+}
+
+func TestValidateFails(t *testing.T) {
+	assert := assert.New(t)
+	b := new(bytes.Buffer)
+	rootCmd.SetOut(b)
+	rootCmd.SetErr(b)
+	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/kubeflow:shouldfail"})
+	err := rootCmd.Execute()
+
+	assert.NotNil(err, "should fail")
+	assert.Contains(b.String(), "validation failed", "did not fail")
 }
 
 func TestFileDoesNotExist(t *testing.T) {
 	assert := assert.New(t)
-	rootCmd.SetArgs([]string{"validate", "--file", "foo.yaml", "container-canary/kubeflow:shouldpass"})
+	b := new(bytes.Buffer)
+	rootCmd.SetOut(b)
+	rootCmd.SetErr(b)
+	rootCmd.SetArgs([]string{"validate", "--file", "foo.yaml", "container-canary/kubeflow:doesnotexist"})
 	err := rootCmd.Execute()
+
 	assert.NotNil(err, "did not error")
+	assert.Contains(b.String(), "Cannot find container-canary/kubeflow:doesnotexist", "did not fail")
 }
