@@ -1,0 +1,35 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: awesome
+description: A dummy example to show all containers are awesome
+command:
+- "sleep"
+- "30"
+checks:
+  - name: packages
+    description: 📦 Required packages are installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "true"
+      initialDelaySeconds: 1
+  - name: services
+    description: 🤖 Expected services are running
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "true"
+      initialDelaySeconds: 2
+  - name: awesome
+    description: 🎉 Your container is awesome
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "true"
+      initialDelaySeconds: 3
