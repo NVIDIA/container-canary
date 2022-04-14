@@ -11,7 +11,7 @@ This project is written in Go and uses `make` for task running. Code should be f
 You can build Canary into `./bin/canary` with:
 
 ```shell
-$ make
+$ make build
 go build -o bin/canary .
 ```
 
