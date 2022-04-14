@@ -131,12 +131,12 @@ We can then run our specification against any desired container image to see a p
 ```console
 $ canary validate --file examples/kubeflow.yaml public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5.0-rc.1
 Validating public.ecr.aws/j1r0q0g6/notebooks/notebook-servers/jupyter-scipy:v1.5.0-rc.1 against kubeflow
- 👩 User is jovyan                                   [true]
- 🆔 User ID is 1000                                  [true]
- 🏠 Home directory is /home/jovyan                   [true]
- 🌏 Exposes an HTTP interface on port 8888           [true]
- 🧭 Correctly routes the NB_PREFIX                   [true]
- 🔓 Sets 'Access-Control-Allow-Origin: *' header     [true]
+ 👩 User is jovyan                                   [passed]
+ 🆔 User ID is 1000                                  [passed]
+ 🏠 Home directory is /home/jovyan                   [passed]
+ 🌏 Exposes an HTTP interface on port 8888           [passed]
+ 🧭 Correctly routes the NB_PREFIX                   [passed]
+ 🔓 Sets 'Access-Control-Allow-Origin: *' header     [passed]
 validation passed
 ```
 
