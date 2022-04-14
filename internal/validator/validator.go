@@ -75,6 +75,7 @@ type model struct {
 	validator        *canaryv1.Validator
 	configPath       string
 	err              error
+	tty              bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -171,7 +172,11 @@ func (m model) View() string {
 	} else {
 		s += fmt.Sprintf("Validating %s against %s\n", highlightStyle(m.image), highlightStyle(m.validator.Name))
 		if !m.containerStarted {
-			s += fmt.Sprintf("%s Starting container\n", m.spinner.View())
+			if m.tty {
+				s += fmt.Sprintf("%s Starting container\n", m.spinner.View())
+			} else {
+				s += "Starting container\n"
+			}
 		} else {
 			if m.debug {
 				// TODO cache this status call to avoid hammering it
@@ -186,7 +191,9 @@ func (m model) View() string {
 					s += "Leaving container running for debugging...\n"
 				}
 			} else {
-				s += m.progress.View() + "\n"
+				if m.tty {
+					s += m.progress.View() + "\n"
+				}
 			}
 		}
 	}
@@ -210,6 +217,13 @@ func (m model) Passed() bool {
 }
 
 func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (bool, error) {
+	var tty io.Reader
+	isTty := true
+	tty, err := os.Open("/dev/tty")
+	if err != nil {
+		tty = bufio.NewReader(os.Stdin)
+		isTty = false
+	}
 	m := model{
 		sub:              make(chan checkResult),
 		configPath:       configPath,
@@ -219,11 +233,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		allChecksPassed:  true,
 		debug:            debug,
 		image:            image,
-	}
-	var tty io.Reader
-	tty, err := os.Open("/dev/tty")
-	if err != nil {
-		tty = bufio.NewReader(os.Stdin)
+		tty:              isTty,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.StartReturningModel()
