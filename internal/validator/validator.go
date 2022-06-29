@@ -69,7 +69,6 @@ type model struct {
 	allChecksPassed  bool
 	spinner          spinner.Model
 	progress         progress.Model
-	quitting         bool
 	debug            bool
 	image            string
 	validator        *canaryv1.Validator
@@ -92,7 +91,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		// These keys should exit the program.
 		case "ctrl+c", "q":
-			m.quitting = true
 			m.allChecksPassed = false
 			if m.containerStarted {
 				return m, shutdown(m.container)
@@ -106,7 +104,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case configLoaded:
 		if msg.Error != nil {
 			m.err = msg.Error
-			return m, tea.Quit
+			return m, tea.Batch(tea.Printf("Error: %s\n", msg.Error.Error()), tea.Quit)
 		}
 		m.validator = msg.Config
 		return m, startContainer(m.image, m.validator)
@@ -114,8 +112,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case containerStarted:
 		m.containerStarted = true
 		m.container = msg.Container
-		// Start checks
 		var checks []tea.Cmd
+		if m.debug {
+			status, _ := m.container.Status()
+			checks = append(checks, tea.Printf("Running container with command '%s'", status.RunCommand))
+		}
+		checks = append(checks, tea.Printf("Validating %s against %s", highlightStyle(m.image), highlightStyle(m.validator.Name)))
 		for _, check := range m.validator.Checks {
 			checks = append(checks, runCheck(m.sub, m.container, check))
 		}
@@ -126,7 +128,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case containerFailed:
 		m.err = msg.Error
-		return m, tea.Quit
+		return m, tea.Batch(tea.Printf("Error: %s\n", m.err.Error()), tea.Quit)
 
 	case checkResult:
 		m.results = append(m.results, msg)
@@ -134,12 +136,19 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.allChecksPassed = false
 		}
 		if len(m.results) == len(m.validator.Checks) {
-			if !m.allChecksPassed && m.debug {
-				return m, nil
+			var commands []tea.Cmd
+
+			if m.allChecksPassed {
+				commands = append(commands, tea.Println(passedStyle("validation passed")))
 			} else {
-				m.quitting = true
-				return m, shutdown(m.container)
+				commands = append(commands, tea.Println(failedStyle("validation failed")))
 			}
+			if !m.allChecksPassed && m.debug {
+				commands = append(commands, tea.Println("Leaving container running for debugging..."))
+			} else {
+				commands = append(commands, shutdown(m.container))
+			}
+			return m, tea.Batch(commands...)
 		}
 		if m.allChecksPassed {
 			m.progress.FullColor = "10"
@@ -147,7 +156,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.progress.FullColor = "9"
 		}
 		cmd := m.progress.SetPercent(float64(len(m.results)) / float64(len(m.validator.Checks)))
-		return m, tea.Batch(waitForChecks(m.sub), cmd)
+		return m, tea.Batch(
+			tea.Printf(" %-50s [%s]", msg.Description, getStatus(msg.Passed, msg.Error)),
+			waitForChecks(m.sub), cmd)
 
 	case spinner.TickMsg:
 		var cmd tea.Cmd
@@ -170,7 +181,6 @@ func (m model) View() string {
 	if m.validator == nil {
 		s += fmt.Sprintf("%s Loading config\n", m.spinner.View())
 	} else {
-		s += fmt.Sprintf("Validating %s against %s\n", highlightStyle(m.image), highlightStyle(m.validator.Name))
 		if !m.containerStarted {
 			if m.tty {
 				s += fmt.Sprintf("%s Starting container\n", m.spinner.View())
@@ -178,37 +188,12 @@ func (m model) View() string {
 				s += "Starting container\n"
 			}
 		} else {
-			if m.debug {
-				// TODO cache this status call to avoid hammering it
-				status, _ := m.container.Status()
-				s += fmt.Sprintf("Running container with command '%s'\n", status.RunCommand)
-			}
-			for _, check := range m.results {
-				s += fmt.Sprintf(" %-50s [%s]\n", check.Description, getStatus(check.Passed, check.Error))
-			}
-			if len(m.results) == len(m.validator.Checks) {
-				if !m.allChecksPassed && m.debug {
-					s += "Leaving container running for debugging...\n"
-				}
-			} else {
-				if m.tty {
-					s += m.progress.View() + "\n"
-				}
+			if m.tty && len(m.results) < len(m.validator.Checks) {
+				s += m.progress.View() + "\n"
 			}
 		}
 	}
-	if m.quitting {
-		if m.err != nil {
-			s += fmt.Sprintf("Error: %s\n", m.err.Error())
-		}
-		if m.allChecksPassed {
-			s += passedStyle("validation passed\n")
-		} else {
-			s += failedStyle("validation failed\n")
-		}
-	} else {
-		s += helpStyle("Press q to quit...")
-	}
+	s += helpStyle("Press q to quit...")
 	return s
 }
 
