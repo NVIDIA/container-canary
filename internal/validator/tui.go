@@ -53,6 +53,8 @@ func (m model) Init() tea.Cmd {
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+
+	// Application events
 	case tea.KeyMsg:
 		return handleKeypress(m, msg)
 	case configLoaded:
@@ -66,6 +68,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case checkResult:
 		return handleCheckResult(m, msg)
 
+	// UI events
 	case spinner.TickMsg:
 		var cmd tea.Cmd
 		m.spinner, cmd = m.spinner.Update(msg)
@@ -74,31 +77,30 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		progressModel, cmd := m.progress.Update(msg)
 		m.progress = progressModel.(progress.Model)
 		return m, cmd
+
 	default:
 		return m, nil
 	}
 }
 
 func (m model) View() string {
-	var s string
+	help := helpStyle("Press q to quit...")
 
-	if m.validator == nil {
-		s += fmt.Sprintf("%s Loading config\n", m.spinner.View())
-	} else {
+	if m.tty {
+		if m.validator == nil {
+			return fmt.Sprintf("%s Loading config\n", m.spinner.View()) + help
+		}
+
 		if !m.containerStarted {
-			if m.tty {
-				s += fmt.Sprintf("%s Starting container\n", m.spinner.View())
-			} else {
-				s += "Starting container\n"
-			}
-		} else {
-			if m.tty && len(m.results) < len(m.validator.Checks) {
-				s += m.progress.View() + "\n"
-			}
+			return fmt.Sprintf("%s Starting container\n", m.spinner.View()) + help
+		}
+
+		if len(m.results) < len(m.validator.Checks) {
+			return m.progress.View() + "\n" + help
 		}
 	}
-	s += helpStyle("Press q to quit...")
-	return s
+
+	return help
 }
 
 func (m model) Passed() bool {
@@ -122,18 +124,23 @@ func handleKeypress(m model, keypress tea.KeyMsg) (model, tea.Cmd) {
 }
 
 func handleConfigLoaded(m model, msg configLoaded) (model, tea.Cmd) {
+	var commands []tea.Cmd
 	if msg.Error != nil {
 		m.err = msg.Error
 		return m, tea.Batch(tea.Printf("Error: %s\n", msg.Error.Error()), tea.Quit)
 	}
 	m.validator = msg.Config
-	return m, startContainer(m.image, m.validator)
+	if !m.tty {
+		commands = append(commands, tea.Printf("Starting container"))
+	}
+	commands = append(commands, startContainer(m.image, m.validator))
+	return m, tea.Batch(commands...)
 }
 
 func handleContainerStarted(m model, msg containerStarted) (model, tea.Cmd) {
+	var commands []tea.Cmd
 	m.containerStarted = true
 	m.container = msg.Container
-	var commands []tea.Cmd
 
 	if m.debug {
 		status, _ := m.container.Status()
@@ -152,13 +159,12 @@ func handleContainerFailed(m model, msg containerFailed) (model, tea.Cmd) {
 }
 
 func handleCheckResult(m model, msg checkResult) (model, tea.Cmd) {
+	var commands []tea.Cmd
 	m.results = append(m.results, msg)
 	if !msg.Passed {
 		m.allChecksPassed = false
 	}
 	if len(m.results) == len(m.validator.Checks) {
-		var commands []tea.Cmd
-
 		if m.allChecksPassed {
 			commands = append(commands, tea.Println(passedStyle("validation passed")))
 		} else {
@@ -169,16 +175,16 @@ func handleCheckResult(m model, msg checkResult) (model, tea.Cmd) {
 		} else {
 			commands = append(commands, shutdown(m.container))
 		}
-		return m, tea.Batch(commands...)
-	}
-
-	if m.allChecksPassed {
-		m.progress.FullColor = "10"
 	} else {
-		m.progress.FullColor = "9"
+		if m.allChecksPassed {
+			m.progress.FullColor = "10"
+		} else {
+			m.progress.FullColor = "9"
+		}
+		commands = append(commands,
+			tea.Printf(" %-50s [%s]", msg.Description, getStatus(msg.Passed, msg.Error)),
+			waitForChecks(m.sub),
+			m.progress.SetPercent(float64(len(m.results))/float64(len(m.validator.Checks))))
 	}
-	cmd := m.progress.SetPercent(float64(len(m.results)) / float64(len(m.validator.Checks)))
-	return m, tea.Batch(
-		tea.Printf(" %-50s [%s]", msg.Description, getStatus(msg.Passed, msg.Error)),
-		waitForChecks(m.sub), cmd)
+	return m, tea.Batch(commands...)
 }
