@@ -53,6 +53,9 @@ func (c *DockerContainer) Start() error {
 	}
 
 	_, err := exec.Command("docker", commandArgs...).Output()
+	if err != nil && strings.Contains(err.Error(), "executable file not found ") {
+		return errors.New("unable to find 'docker' on the PATH, please ensure Docker is installed and running (you can check this by running 'docker info')")
+	}
 	c.runCommand = fmt.Sprintf("docker %s", strings.Join(commandArgs, " "))
 
 	for startTime := time.Now(); ; {
