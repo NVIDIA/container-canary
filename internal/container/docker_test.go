@@ -43,20 +43,24 @@ func TestDockerContainer(t *testing.T) {
 	defer c.Remove()
 	if err != nil {
 		t.Errorf("Failed to start container: %s", err.Error())
+		return
 	}
 
 	status, err := c.Status()
 	if err != nil {
 		t.Errorf("Failed to inspect container: %s", err.Error())
+		return
 	}
 	assert.Contains(status.RunCommand, "docker run", "Run command not stored correctly")
 
 	uname, err := c.Exec("uname", "-a")
 	if err != nil {
 		t.Errorf("Failed to exec command in container: %s", err.Error())
+		return
 	}
 	if !strings.Contains(uname, "Linux") {
 		t.Error("Output for command 'uname' did not contain expected string 'Linux'")
+		return
 	}
 }
 func TestDockerContainerRemoves(t *testing.T) {
@@ -65,10 +69,12 @@ func TestDockerContainerRemoves(t *testing.T) {
 	err := c.Start()
 	if err != nil {
 		t.Errorf("Failed to start container: %s", err.Error())
+		return
 	}
 
 	err = c.Remove()
 	if err != nil {
 		t.Errorf("Failed to remove container: %s", err.Error())
+		return
 	}
 }
