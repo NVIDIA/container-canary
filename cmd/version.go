@@ -19,10 +19,11 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/nvidia/container-canary/internal"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var versionCmd = &cobra.Command{
@@ -40,7 +41,7 @@ var versionCmd = &cobra.Command{
 }
 
 func showLine(cmd *cobra.Command, title string, value string) {
-	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", strings.Title(title)), value)
+	cmd.Printf(" %-16s %s\n", fmt.Sprintf("%s:", cases.Title(language.Und, cases.NoLower).String(title)), value)
 }
 
 func init() {

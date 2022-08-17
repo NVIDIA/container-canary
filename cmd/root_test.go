@@ -30,7 +30,8 @@ func TestRoot(t *testing.T) {
 	b := new(bytes.Buffer)
 	rootCmd.SetOut(b)
 	rootCmd.SetErr(b)
-	rootCmd.Execute()
+	err := rootCmd.Execute()
+	assert.Nil(err)
 
 	assert.Contains(b.String(), "Usage:", "did not how usage")
 }
