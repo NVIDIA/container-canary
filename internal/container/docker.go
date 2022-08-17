@@ -64,12 +64,14 @@ func (c *DockerContainer) Start() error {
 			return err
 		}
 		if info.State.Status == "exited" {
+			c.Remove()
 			return errors.New("container failed to start")
 		}
 		if info.State.Running {
 			break
 		}
 		if time.Since(startTime) > (time.Second * 10) {
+			c.Remove()
 			return errors.New("container failed to start after 10 seconds")
 		}
 		time.Sleep(time.Second)
