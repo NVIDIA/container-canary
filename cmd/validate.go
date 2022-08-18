@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nvidia/container-canary/internal/container"
 	"github.com/nvidia/container-canary/internal/validator"
 	"github.com/spf13/cobra"
 )
@@ -31,7 +32,7 @@ var validateCmd = &cobra.Command{
 	Long:          ``,
 	Args:          imageArg,
 	SilenceUsage:  true,
-	SilenceErrors: true,
+	SilenceErrors: false,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		file, err := cmd.Flags().GetString("file")
 		if err != nil {
@@ -66,6 +67,10 @@ func imageArg(cmd *cobra.Command, args []string) error {
 
 	if len(args) > 1 {
 		return errors.New("too many arguments")
+	}
+
+	if err := container.CheckForDocker(); err != nil {
+		return err
 	}
 
 	image := args[0]

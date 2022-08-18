@@ -52,10 +52,10 @@ func (c *DockerContainer) Start() error {
 		commandArgs = append(commandArgs, c.Command...)
 	}
 
-	_, err := exec.Command("docker", commandArgs...).Output()
-	if err != nil && strings.Contains(err.Error(), "executable file not found ") {
-		return errors.New("unable to find 'docker' on the PATH, please ensure Docker is installed and running (you can check this by running 'docker info')")
+	if err := CheckForDocker(); err != nil {
+		return err
 	}
+	_, err := exec.Command("docker", commandArgs...).Output()
 	c.runCommand = fmt.Sprintf("docker %s", strings.Join(commandArgs, " "))
 
 	for startTime := time.Now(); ; {
@@ -64,12 +64,14 @@ func (c *DockerContainer) Start() error {
 			return err
 		}
 		if info.State.Status == "exited" {
+			c.Remove()
 			return errors.New("container failed to start")
 		}
 		if info.State.Running {
 			break
 		}
 		if time.Since(startTime) > (time.Second * 10) {
+			c.Remove()
 			return errors.New("container failed to start after 10 seconds")
 		}
 		time.Sleep(time.Second)
@@ -79,6 +81,17 @@ func (c *DockerContainer) Start() error {
 		return err
 	}
 
+	return nil
+}
+
+func CheckForDocker() error {
+	if _, err := exec.LookPath("docker"); err != nil {
+		return errors.New("Docker is missing")
+	}
+
+	if _, err := exec.Command("docker", "ps").Output(); err != nil {
+		return errors.New("Docker requires root privileges to run")
+	}
 	return nil
 }
 
