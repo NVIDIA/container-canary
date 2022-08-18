@@ -36,6 +36,16 @@ go test -v ./...
 PASS
 ```
 
+## Linting
+
+This project enforces linting with `golangci-lint`. You can use [pre-commit](https://pre-commit.com/) to check this automatically on commit, which will save time as you can catch linting errors before the CI does.
+
+```console
+$ pre-commit install                                                                  
+pre-commit installed at .git/hooks/pre-commit
+
+$ pre-commit run --all-files
+
 ## Signing Your Work
 
 * We require that all contributors "sign-off" on their commits. This certifies that the contribution is your original work, or you have rights to submit it under the same license, or a compatible license.

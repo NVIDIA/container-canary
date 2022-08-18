@@ -31,7 +31,8 @@ func TestVersion(t *testing.T) {
 	rootCmd.SetOut(b)
 	rootCmd.SetErr(b)
 	rootCmd.SetArgs([]string{"version"})
-	rootCmd.Execute()
+	err := rootCmd.Execute()
+	assert.Nil(err)
 
 	assert.Contains(b.String(), "Version:", "mission version")
 	assert.Contains(b.String(), "Go Version:", "missing go version")
