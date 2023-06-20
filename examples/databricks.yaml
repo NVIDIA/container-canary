@@ -1,0 +1,77 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: databricks
+description: Databricks
+documentation: https://docs.databricks.com/clusters/custom-containers.html#option-2-build-your-own-docker-base
+env: []
+volumes: []
+command:
+- /bin/sh
+- -c
+- "sleep 3600"
+checks:
+  - name: bash
+    description: Has bash installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which bash"
+  - name: sudo
+    description: Has sudo installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which sudo"
+  - name: sudo
+    description: Has procps installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which ps"
+  - name: sudo
+    description: Has iproute2 installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which ip"
+  - name: sudo
+    description: Has coreutils installed
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "which cat"
+  - name: distro
+    description: Uses Ubuntu or Alpine
+    probe:
+      exec:
+        command:
+          - grep
+          - 'ubuntu\|alpine'
+          - /etc/os-release
+  - name: java8
+    description: Has Java 8 installed
+    probe:
+      exec:
+        command:
+          - /bin/bash
+          - -c
+          - "java -version 2>&1 | grep 8u"
+  - name: python
+    description: Has Python virtualenv installed
+    probe:
+      exec:
+        command:
+          - /bin/bash
+          - -c
+          - "which virtualenv"
+    # TODO R
