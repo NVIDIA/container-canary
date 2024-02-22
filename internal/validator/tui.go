@@ -160,18 +160,21 @@ func handleContainerFailed(m model, msg containerFailed) (model, tea.Cmd) {
 
 func handleCheckResult(m model, msg checkResult) (model, tea.Cmd) {
 	var commands []tea.Cmd
+	var printCommands []tea.Cmd
 	m.results = append(m.results, msg)
 	if !msg.Passed {
 		m.allChecksPassed = false
 	}
+	printCommands = append(printCommands,
+		tea.Printf(" %-50s [%s]", msg.Description, getStatus(msg.Passed, msg.Error)))
 	if len(m.results) == len(m.validator.Checks) {
 		if m.allChecksPassed {
-			commands = append(commands, tea.Println(passedStyle("validation passed")))
+			printCommands = append(printCommands, tea.Println(passedStyle("validation passed")))
 		} else {
-			commands = append(commands, tea.Println(failedStyle("validation failed")))
+			printCommands = append(printCommands, tea.Println(failedStyle("validation failed")))
 		}
 		if !m.allChecksPassed && m.debug {
-			commands = append(commands, tea.Println("Leaving container running for debugging..."))
+			printCommands = append(printCommands, tea.Println("Leaving container running for debugging..."))
 		} else {
 			commands = append(commands, shutdown(m.container))
 		}
@@ -182,9 +185,8 @@ func handleCheckResult(m model, msg checkResult) (model, tea.Cmd) {
 			m.progress.FullColor = "9"
 		}
 		commands = append(commands,
-			tea.Printf(" %-50s [%s]", msg.Description, getStatus(msg.Passed, msg.Error)),
 			waitForChecks(m.sub),
 			m.progress.SetPercent(float64(len(m.results))/float64(len(m.validator.Checks))))
 	}
-	return m, tea.Batch(commands...)
+	return m, tea.Sequence(tea.Sequence(printCommands...), tea.Batch(commands...))
 }
