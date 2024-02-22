@@ -31,4 +31,4 @@ jobs:
         run: |
           cd bin
           tag_name="${GITHUB_REF##*/}"
-          hub release edit $(find . -type f -name "canary_*" -printf "-a %p ") -m "" "$tag_name"
+          gh release upload "$tag_name" canary_*
