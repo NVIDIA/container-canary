@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -56,7 +55,7 @@ func LoadValidatorFromFile(path string) (*canaryv1.Validator, error) {
 		return nil, fmt.Errorf("no such file %s", filename)
 	}
 
-	yamlFile, err := ioutil.ReadFile(filename)
+	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
