@@ -104,26 +104,26 @@ func (p *Probe) UnmarshalYAML(unmarshal func(interface{}) error) error {
 type HTTPGetAction struct {
 	// Path to access on the HTTP server.
 	// +optional
-	Path string `json:"path,omitempty"`
+	Path string `yaml:"path,omitempty"`
 	// Number of the port to access on the container.
 	// Number must be in the range 1 to 65535.
-	Port int `json:"port"`
+	Port int `yaml:"port"`
 	// Scheme to use for connecting to the host.
 	// Defaults to HTTP.
 	// +optional
-	Scheme v1.URIScheme `json:"scheme,omitempty"`
+	Scheme v1.URIScheme `yaml:"scheme,omitempty"`
 	// Custom headers to set in the request. HTTP allows repeated headers.
 	// +optional
-	HTTPHeaders []v1.HTTPHeader `json:"httpHeaders,omitempty"`
+	HTTPHeaders []v1.HTTPHeader `yaml:"httpHeaders,omitempty"`
 	// Headers expected in the response. Check will fail if any are missing.
 	// +optional
-	ResponseHTTPHeaders []v1.HTTPHeader `json:"responseHttpHeaders,omitempty"`
+	ResponseHTTPHeaders []v1.HTTPHeader `yaml:"responseHttpHeaders,omitempty"`
 }
 
 type TCPSocketAction struct {
 	// Number or name of the port to access on the container.
 	// Number must be in the range 1 to 65535.
-	Port int `json:"port"`
+	Port int `yaml:"port"`
 }
 
 type Volume struct {

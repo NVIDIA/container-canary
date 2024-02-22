@@ -56,6 +56,9 @@ checks:
       httpGet:
         path: /
         port: 8888
+        httpHeaders:
+          - name: User-Agent
+            value: container-canary/0.2.1
         responseHttpHeaders:
           - name: Access-Control-Allow-Origin
             value: "*"

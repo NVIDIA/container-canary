@@ -41,4 +41,19 @@ func TestValidator(t *testing.T) {
 
 	assert.Equal(0, check.Probe.InitialDelaySeconds)
 
+	check = validator.Checks[5]
+
+	assert.Equal("allow-origin-all", check.Name)
+	assert.Equal("🔓 Sets 'Access-Control-Allow-Origin: *' header", check.Description)
+
+	assert.Equal("/", check.Probe.HTTPGet.Path)
+	assert.Equal(8888, check.Probe.HTTPGet.Port)
+
+	header := check.Probe.HTTPGet.HTTPHeaders[0]
+	assert.Equal("User-Agent", header.Name)
+	assert.Equal("container-canary/0.2.1", header.Value)
+
+	header = check.Probe.HTTPGet.ResponseHTTPHeaders[0]
+	assert.Equal("Access-Control-Allow-Origin", header.Name)
+	assert.Equal("*", header.Value)
 }
