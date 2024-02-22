@@ -81,7 +81,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		tty:              isTty,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
-	out, err := p.StartReturningModel()
+	out, err := p.Run()
 	if err != nil {
 		return false, err
 	}
