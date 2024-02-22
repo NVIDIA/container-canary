@@ -23,9 +23,10 @@ import (
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
+	"github.com/rs/zerolog"
 )
 
-func TCPSocketCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+func TCPSocketCheck(c container.ContainerInterface, probe *canaryv1.Probe, e *zerolog.Event) (bool, error) {
 	action := probe.TCPSocket
 	address := fmt.Sprintf("localhost:%d", action.Port)
 	_, err := net.Dial("tcp", address)

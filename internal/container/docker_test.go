@@ -58,11 +58,12 @@ func TestDockerContainer(t *testing.T) {
 	}
 	assert.Contains(status.RunCommand, "docker run", "Run command not stored correctly")
 
-	uname, err := c.Exec("uname", "-a")
+	exitCode, uname, _, err := c.Exec("uname", "-a")
 	if err != nil {
 		t.Errorf("Failed to exec command in container: %s", err.Error())
 		return
 	}
+	assert.Equal(0, exitCode)
 	if !strings.Contains(uname, "Linux") {
 		t.Error("Output for command 'uname' did not contain expected string 'Linux'")
 		return

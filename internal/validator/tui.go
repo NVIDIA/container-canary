@@ -25,6 +25,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
+	"github.com/rs/zerolog"
 )
 
 type model struct {
@@ -41,6 +42,7 @@ type model struct {
 	configPath       string
 	err              error
 	tty              bool
+	log              zerolog.Logger
 }
 
 func (m model) Init() tea.Cmd {
@@ -148,7 +150,7 @@ func handleContainerStarted(m model, msg containerStarted) (model, tea.Cmd) {
 	}
 	commands = append(commands, tea.Printf("Validating %s against %s", highlightStyle(m.image), highlightStyle(m.validator.Name)))
 	for _, check := range m.validator.Checks {
-		commands = append(commands, runCheck(m.sub, m.container, check))
+		commands = append(commands, runCheck(m.log, m.sub, m.container, check))
 	}
 	return m, tea.Batch(commands...)
 }
