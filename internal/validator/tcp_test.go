@@ -40,6 +40,7 @@ func TestTCPSocketSuccess(t *testing.T) {
 	wg.Add(1)
 	listener, err := net.Listen("tcp", "localhost:54321")
 	require.NoError(err)
+	defer listener.Close()
 	success := false
 	go func() {
 		conn, err := listener.Accept()
