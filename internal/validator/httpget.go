@@ -50,6 +50,9 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe, e *zero
 	if err != nil {
 		return false, nil
 	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return false, nil
+	}
 	for _, header := range action.ResponseHTTPHeaders {
 		if val := resp.Header.Values(header.Name); len(val) != 0 {
 			if header.Value != strings.Join(val[:], "") {
