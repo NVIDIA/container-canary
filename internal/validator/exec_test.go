@@ -18,45 +18,12 @@
 package validator
 
 import (
-	"bytes"
-	"errors"
 	"testing"
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
-	"github.com/nvidia/container-canary/internal/container"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/api/core/v1"
 )
-
-type dummyContainer struct{}
-
-func (c *dummyContainer) Start() error { return nil }
-
-func (c *dummyContainer) Remove() error { return nil }
-
-func (c *dummyContainer) Status() (*container.ContainerInfo, error) { return nil, nil }
-
-func (c *dummyContainer) Exec(command ...string) (exitCode int, stdout string, stderr string, err error) {
-	switch command[0] {
-	case "success":
-		return 0, "Success stdout", "Success stderr", nil
-	case "failure":
-		return 1, "Failure stdout", "Failure stderr", nil
-	case "error":
-		return 0, "", "", errors.New("This command is an error")
-	default:
-		return 1, "", "", nil
-	}
-}
-
-func (c *dummyContainer) Logs() (string, error) { return "", nil }
-
-func logger() (zerolog.Logger, *bytes.Buffer) {
-	buf := new(bytes.Buffer)
-	logger := zerolog.New(buf)
-	return logger, buf
-}
 
 func TestExecSuccess(t *testing.T) {
 	assert := assert.New(t)
@@ -72,6 +39,7 @@ func TestExecSuccess(t *testing.T) {
 	e := logger.Info()
 	result, err := ExecCheck(c, probe, e)
 	e.Send()
+
 	assert.True(result)
 	assert.NoError(err)
 	assert.Equal("{\"level\":\"info\",\"exitCode\":0,\"stdout\":\"Success stdout\",\"stderr\":\"Success stderr\"}\n", buf.String())
