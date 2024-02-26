@@ -46,7 +46,7 @@ func TestValidator(t *testing.T) {
 	assert.Equal("allow-origin-all", check.Name)
 	assert.Equal("🔓 Sets 'Access-Control-Allow-Origin: *' header", check.Description)
 
-	assert.Equal("/", check.Probe.HTTPGet.Path)
+	assert.Equal("/hub/jovyan", check.Probe.HTTPGet.Path)
 	assert.Equal(8888, check.Probe.HTTPGet.Port)
 
 	header := check.Probe.HTTPGet.HTTPHeaders[0]

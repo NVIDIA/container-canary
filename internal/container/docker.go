@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os/exec"
 	"strings"
 	"time"
@@ -136,11 +137,42 @@ func (c DockerContainer) Status() (*ContainerInfo, error) {
 }
 
 // Exec a command inside a container
-func (c DockerContainer) Exec(command ...string) (string, error) {
+func (c DockerContainer) Exec(command ...string) (exitCode int, stdout string, stderr string, err error) {
 
 	args := append([]string{"exec", c.Name}, command...)
-	out, err := exec.Command("docker", args...).Output()
-	return string(out), err
+	cmd := exec.Command("docker", args...)
+	stdoutPipe, err := cmd.StdoutPipe()
+	if err != nil {
+		return
+	}
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		return
+	}
+
+	if err = cmd.Start(); err != nil {
+		return
+	}
+
+	stdoutBytes, err := io.ReadAll(stdoutPipe)
+	if err != nil {
+		return
+	}
+	stderrBytes, err := io.ReadAll(stderrPipe)
+	if err != nil {
+		return
+	}
+
+	if err = cmd.Wait(); err != nil {
+		switch t := err.(type) {
+		case *exec.ExitError:
+			exitCode = t.ExitCode()
+		default:
+			return
+		}
+	}
+
+	return exitCode, string(stdoutBytes), string(stderrBytes), nil
 }
 
 // Get container logs

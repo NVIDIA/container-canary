@@ -33,6 +33,7 @@ import (
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/config"
 	"github.com/nvidia/container-canary/internal/container"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -59,15 +60,26 @@ type configLoaded struct {
 	Error  error
 }
 
-type probeCallable func(container.ContainerInterface, *canaryv1.Probe) (bool, error)
+type probeCallable func(container.ContainerInterface, *canaryv1.Probe, *zerolog.Event) (bool, error)
 
-func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (bool, error) {
+func Validate(image string, configPath string, logPath string, cmd *cobra.Command, debug bool) (bool, error) {
 	var tty io.Reader
 	isTty := true
 	tty, err := os.Open("/dev/tty")
 	if err != nil {
 		tty = bufio.NewReader(os.Stdin)
 		isTty = false
+	}
+	var log zerolog.Logger
+	if logPath == "" {
+		log = zerolog.Nop()
+	} else {
+		f, err := tea.LogToFile(logPath, "canary")
+		if err != nil {
+			return false, err
+		}
+		log = zerolog.New(f)
+		defer f.Close()
 	}
 	m := model{
 		sub:              make(chan checkResult),
@@ -79,6 +91,7 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		debug:            debug,
 		image:            image,
 		tty:              isTty,
+		log:              log,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.Run()
@@ -152,17 +165,17 @@ func waitForChecks(sub chan checkResult) tea.Cmd {
 	}
 }
 
-func runCheck(results chan<- checkResult, c container.ContainerInterface, check canaryv1.Check) tea.Cmd {
+func runCheck(log zerolog.Logger, results chan<- checkResult, c container.ContainerInterface, check canaryv1.Check) tea.Cmd {
 	return func() tea.Msg {
 		var p bool
 		var err error
 		// TODO Make more SOLID (O)
 		if check.Probe.Exec != nil {
-			p, err = executeCheck(ExecCheck, c, &check.Probe)
+			p, err = executeCheck(ExecCheck, log, c, check)
 		} else if check.Probe.HTTPGet != nil {
-			p, err = executeCheck(HTTPGetCheck, c, &check.Probe)
+			p, err = executeCheck(HTTPGetCheck, log, c, check)
 		} else if check.Probe.TCPSocket != nil {
-			p, err = executeCheck(TCPSocketCheck, c, &check.Probe)
+			p, err = executeCheck(TCPSocketCheck, log, c, check)
 		} else {
 			results <- checkResult{check.Description, false, fmt.Errorf("check '%s' has no known probes", check.Name)}
 			return nil
@@ -173,13 +186,19 @@ func runCheck(results chan<- checkResult, c container.ContainerInterface, check 
 }
 
 // Run a check method with appropriate delay, retries and retry interval
-func executeCheck(method probeCallable, c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
-	time.Sleep(time.Duration(probe.InitialDelaySeconds) * time.Second)
+func executeCheck(method probeCallable, log zerolog.Logger, c container.ContainerInterface, check canaryv1.Check) (bool, error) {
+	time.Sleep(time.Duration(check.Probe.InitialDelaySeconds) * time.Second)
 	passes := 0
 	fails := 0
 	start := time.Now()
+	attempt := 1
 	for {
-		passFail, err := method(c, probe)
+		event := log.Info().Str("check", check.Name).Int("attempt", attempt)
+		passFail, err := method(c, &check.Probe, event)
+		event.Bool("pass", passFail)
+		event.Send()
+		attempt++
+
 		if err != nil {
 			return false, err
 		}
@@ -190,13 +209,13 @@ func executeCheck(method probeCallable, c container.ContainerInterface, probe *c
 			fails += 1
 			passes = 0
 		}
-		if passes >= probe.SuccessThreshold || fails >= probe.FailureThreshold {
+		if passes >= check.Probe.SuccessThreshold || fails >= check.Probe.FailureThreshold {
 			return passFail, err
 		}
-		if time.Since(start) > time.Duration(probe.TimeoutSeconds)*time.Second {
-			return false, fmt.Errorf("check timed out after %d seconds", probe.TimeoutSeconds)
+		if time.Since(start) > time.Duration(check.Probe.TimeoutSeconds)*time.Second {
+			return false, fmt.Errorf("check timed out after %d seconds", check.Probe.TimeoutSeconds)
 		}
-		time.Sleep(time.Duration(probe.PeriodSeconds) * time.Second)
+		time.Sleep(time.Duration(check.Probe.PeriodSeconds) * time.Second)
 	}
 }
 

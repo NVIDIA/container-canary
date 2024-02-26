@@ -34,11 +34,11 @@ var validateCmd = &cobra.Command{
 	SilenceUsage:  true,
 	SilenceErrors: false,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		file, err := cmd.Flags().GetString("file")
+		configPath, err := cmd.Flags().GetString("file")
 		if err != nil {
 			return err
 		}
-		if file == "" {
+		if configPath == "" {
 			return errors.New("you must specify a manifest with '--file path/url'")
 		}
 
@@ -48,7 +48,12 @@ var validateCmd = &cobra.Command{
 			return err
 		}
 
-		v, err := validator.Validate(image, file, cmd, debug)
+		logPath, err := cmd.Flags().GetString("log-file")
+		if err != nil {
+			return err
+		}
+
+		v, err := validator.Validate(image, configPath, logPath, cmd, debug)
 		if err != nil {
 			cmd.Printf("Error: %s\n", err.Error())
 			return err
@@ -85,6 +90,7 @@ func imageArg(cmd *cobra.Command, args []string) error {
 func init() {
 	rootCmd.AddCommand(validateCmd)
 	validateCmd.PersistentFlags().String("file", "", "Path or URL of a manifest to validate against.")
+	validateCmd.PersistentFlags().String("log-file", "", "File to print log output to.")
 	validateCmd.PersistentFlags().Bool("debug", false, "Keep container running on failure for debugging.")
 
 }

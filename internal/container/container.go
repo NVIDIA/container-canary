@@ -40,7 +40,7 @@ type ContainerInterface interface {
 	Start() error
 	Remove() error
 	Status() (*ContainerInfo, error)
-	Exec(command ...string) (string, error)
+	Exec(command ...string) (exitCode int, stdout string, stderr string, err error)
 	Logs() (string, error)
 }
 

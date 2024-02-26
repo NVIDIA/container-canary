@@ -18,15 +18,18 @@
 package validator
 
 import (
+	"github.com/rs/zerolog"
+
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
 )
 
-func ExecCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+func ExecCheck(c container.ContainerInterface, probe *canaryv1.Probe, e *zerolog.Event) (bool, error) {
 	action := probe.Exec
-	_, err := c.Exec(action.Command...)
+	exitCode, stdout, stderr, err := c.Exec(action.Command...)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
-	return true, nil
+	e.Int("exitCode", exitCode).Str("stdout", stdout).Str("stderr", stderr)
+	return exitCode == 0, nil
 }

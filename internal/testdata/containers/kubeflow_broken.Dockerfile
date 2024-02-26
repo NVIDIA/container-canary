@@ -16,4 +16,4 @@ ENV PATH=/home/bob/.local/bin:$PATH
 
 RUN pip install jupyterlab
 
-CMD jupyter lab --ip=0.0.0.0
+CMD jupyter lab --ip=0.0.0.0 --ServerApp.allow_origin="*" --ServerApp.base_url="$NB_PREFIX"

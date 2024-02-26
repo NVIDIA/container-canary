@@ -58,15 +58,22 @@ func TestDockerContainer(t *testing.T) {
 	}
 	assert.Contains(status.RunCommand, "docker run", "Run command not stored correctly")
 
-	uname, err := c.Exec("uname", "-a")
+	exitCode, uname, _, err := c.Exec("uname", "-a")
 	if err != nil {
 		t.Errorf("Failed to exec command in container: %s", err.Error())
 		return
 	}
+	assert.Equal(0, exitCode)
 	if !strings.Contains(uname, "Linux") {
 		t.Error("Output for command 'uname' did not contain expected string 'Linux'")
 		return
 	}
+
+	exitCode, stdout, stderr, err := c.Exec("sh", "-c", `echo "This is stdout" && echo "This is stderr" >&2 && exit 42`)
+	assert.NoError(err)
+	assert.Equal("This is stdout\n", stdout)
+	assert.Equal("This is stderr\n", stderr)
+	assert.Equal(42, exitCode)
 }
 func TestDockerContainerRemoves(t *testing.T) {
 	c := New("nginx", nil, nil, nil, nil)
