@@ -17,10 +17,13 @@ build: ## Build for the current platform
 	@echo version: $(VERSION)
 	@echo commit: $(COMMIT)
 
+# NOTE: Linux builds set CGO_ENABLED=0 to avoid dynamic linking against libc,
+#       which can cause issues of the form "version `GLIBC_2.32' not found" when using
+#       the package on systems that are older than where it was built.
 package: ## Build for all platforms
 	env GOOS=windows GOARCH=amd64 go build -o bin/$(EXECUTABLE)_windows_amd64.exe $(GO_FLAGS) .
-	env GOOS=linux GOARCH=amd64 go build -o bin/$(EXECUTABLE)_linux_amd64 $(GO_FLAGS) .
-	env GOOS=linux GOARCH=arm64 go build -o bin/$(EXECUTABLE)_linux_arm64 $(GO_FLAGS) .
+	env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o bin/$(EXECUTABLE)_linux_amd64 $(GO_FLAGS) .
+	env GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o bin/$(EXECUTABLE)_linux_arm64 $(GO_FLAGS) .
 	env GOOS=darwin GOARCH=amd64 go build -o bin/$(EXECUTABLE)_darwin_amd64 $(GO_FLAGS) .
 	env GOOS=darwin GOARCH=arm64 go build -o bin/$(EXECUTABLE)_darwin_arm64 $(GO_FLAGS) .
 	@echo built:  bin/$(EXECUTABLE)_windows_amd64.exe, bin/$(EXECUTABLE)_linux_amd64, bin/$(EXECUTABLE)_linux_arm64, bin/$(EXECUTABLE)_darwin_amd64, bin/$(EXECUTABLE)_darwin_arm64
