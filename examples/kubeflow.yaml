@@ -40,7 +40,7 @@ checks:
     description: 🌏 Exposes an HTTP interface on port 8888
     probe:
       httpGet:
-        path: /
+        path: /hub/jovyan
         port: 8888
       failureThreshold: 30
   - name: NB_PREFIX
@@ -54,7 +54,7 @@ checks:
     description: "🔓 Sets 'Access-Control-Allow-Origin: *' header"
     probe:
       httpGet:
-        path: /
+        path: /hub/jovyan
         port: 8888
         httpHeaders:
           - name: User-Agent

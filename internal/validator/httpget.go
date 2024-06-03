@@ -24,9 +24,10 @@ import (
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
+	"github.com/rs/zerolog"
 )
 
-func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
+func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe, e *zerolog.Event) (bool, error) {
 	action := probe.HTTPGet
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", action.Port, action.Path), nil)
@@ -39,14 +40,26 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 		req.Header.Set(header.Name, header.Value)
 	}
 	resp, err := client.Do(req)
+	if resp != nil {
+		headers := zerolog.Dict()
+		for name, value := range resp.Header {
+			headers.Str(name, strings.Join(value[:], ""))
+		}
+		e.Dict("headers", headers).Int("status", resp.StatusCode)
+	}
 	if err != nil {
 		return false, nil
 	}
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		return false, nil
+	}
 	for _, header := range action.ResponseHTTPHeaders {
-		if val, ok := resp.Header[header.Name]; ok {
+		if val := resp.Header.Values(header.Name); len(val) != 0 {
 			if header.Value != strings.Join(val[:], "") {
 				return false, nil
 			}
+		} else {
+			return false, nil
 		}
 	}
 	defer resp.Body.Close()
