@@ -1,0 +1,18 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: gpu
+description: A GPU example to show you can pass extra flags to Docker
+command:
+- "sleep"
+- "30"
+dockerRunOptions:
+- "--gpus"
+- "all"
+checks:
+  - name: nvidia-smi
+    description: 📦 Can run nvidia-smi
+    probe:
+      exec:
+        command:
+          - /usr/bin/nvidia-smi
+      initialDelaySeconds: 1
