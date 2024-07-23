@@ -20,6 +20,7 @@ type DockerContainer struct {
 	Env        []v1.EnvVar
 	Ports      []v1.ServicePort
 	Volumes    []canaryv1.Volume
+	RunOptions []string
 	runCommand string
 }
 
@@ -44,6 +45,10 @@ func (c *DockerContainer) Start() error {
 		} else {
 			commandArgs = append(commandArgs, "-v", v.MountPath)
 		}
+	}
+
+	if len(c.RunOptions) > 0 {
+		commandArgs = append(commandArgs, c.RunOptions...)
 	}
 
 	commandArgs = append(commandArgs, c.Image)

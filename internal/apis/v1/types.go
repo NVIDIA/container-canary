@@ -48,6 +48,10 @@ type Validator struct {
 	// A command to run in the container
 	// +optional
 	Command []string
+
+	// Additional flags to pass to the docker CLI.
+	// +optional
+	DockerRunOptions []string  `yaml:"dockerRunOptions"`
 }
 
 type Check struct {

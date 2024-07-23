@@ -26,7 +26,7 @@ import (
 	"path/filepath"
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func LoadValidatorFromURL(url string) (*canaryv1.Validator, error) {

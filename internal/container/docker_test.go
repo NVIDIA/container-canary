@@ -37,7 +37,7 @@ func TestDockerContainer(t *testing.T) {
 	volumes := []canaryv1.Volume{
 		{MountPath: "/foo"},
 	}
-	c := New("nginx", env, ports, volumes, nil)
+	c := New("nginx", env, ports, volumes, nil, nil)
 
 	err := c.Start()
 
@@ -69,7 +69,7 @@ func TestDockerContainer(t *testing.T) {
 	}
 }
 func TestDockerContainerRemoves(t *testing.T) {
-	c := New("nginx", nil, nil, nil, nil)
+	c := New("nginx", nil, nil, nil, nil, nil)
 
 	err := c.Start()
 	if err != nil {
