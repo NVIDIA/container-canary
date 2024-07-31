@@ -42,9 +42,10 @@ type ContainerInterface interface {
 	Status() (*ContainerInfo, error)
 	Exec(command ...string) (string, error)
 	Logs() (string, error)
+	GetStartupTimeout() int
 }
 
-func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []canaryv1.Volume, command []string, dockerRunOptions []string) ContainerInterface {
+func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []canaryv1.Volume, command []string, dockerRunOptions []string, startupTimeout int) ContainerInterface {
 	name := fmt.Sprintf("%s%s", "canary-runner-", uuid.New().String()[:8])
-	return &DockerContainer{Name: name, Image: image, Command: command, Env: env, Ports: ports, Volumes: volumes, RunOptions: dockerRunOptions}
+	return &DockerContainer{Name: name, Image: image, Command: command, Env: env, Ports: ports, Volumes: volumes, RunOptions: dockerRunOptions, StartupTimeout: startupTimeout}
 }

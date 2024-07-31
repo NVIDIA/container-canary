@@ -22,6 +22,7 @@ type DockerContainer struct {
 	Volumes    []canaryv1.Volume
 	RunOptions []string
 	runCommand string
+	StartupTimeout int
 }
 
 // Start a container
@@ -78,12 +79,12 @@ func (c *DockerContainer) Start() error {
 		if info.State.Running {
 			break
 		}
-		if time.Since(startTime) > (time.Second * 10) {
+		if time.Since(startTime) > (time.Second * time.Duration(c.StartupTimeout)) {
 			err := c.Remove()
 			if err != nil {
 				return err
 			}
-			return errors.New("container failed to start after 10 seconds")
+			return errors.New(fmt.Sprintf("container failed to start after %d seconds", c.StartupTimeout))
 		}
 		time.Sleep(time.Second)
 	}
@@ -152,4 +153,9 @@ func (c DockerContainer) Exec(command ...string) (string, error) {
 func (c DockerContainer) Logs() (string, error) {
 	out, err := exec.Command("docker", "logs", c.Name).Output()
 	return string(out), err
+}
+
+// Get startup timeout
+func (c DockerContainer) GetStartupTimeout() int {
+	return c.StartupTimeout
 }

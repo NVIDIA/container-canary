@@ -41,6 +41,7 @@ type model struct {
 	configPath       string
 	err              error
 	tty              bool
+	containerStartupTimeout int
 }
 
 func (m model) Init() tea.Cmd {
@@ -133,7 +134,7 @@ func handleConfigLoaded(m model, msg configLoaded) (model, tea.Cmd) {
 	if !m.tty {
 		commands = append(commands, tea.Printf("Starting container"))
 	}
-	commands = append(commands, startContainer(m.image, m.validator))
+	commands = append(commands, startContainer(m.image, m.validator, m.container.GetStartupTimeout()))
 	return m, tea.Batch(commands...)
 }
 

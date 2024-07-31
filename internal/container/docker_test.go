@@ -37,7 +37,7 @@ func TestDockerContainer(t *testing.T) {
 	volumes := []canaryv1.Volume{
 		{MountPath: "/foo"},
 	}
-	c := New("nginx", env, ports, volumes, nil, nil)
+	c := New("nginx", env, ports, volumes, nil, nil, 7)
 
 	err := c.Start()
 
@@ -67,9 +67,11 @@ func TestDockerContainer(t *testing.T) {
 		t.Error("Output for command 'uname' did not contain expected string 'Linux'")
 		return
 	}
+
+	assert.Equal(c.GetStartupTimeout(), 7)
 }
 func TestDockerContainerRemoves(t *testing.T) {
-	c := New("nginx", nil, nil, nil, nil, nil)
+	c := New("nginx", nil, nil, nil, nil, nil, 2)
 
 	err := c.Start()
 	if err != nil {

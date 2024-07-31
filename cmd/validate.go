@@ -86,5 +86,5 @@ func init() {
 	rootCmd.AddCommand(validateCmd)
 	validateCmd.PersistentFlags().String("file", "", "Path or URL of a manifest to validate against.")
 	validateCmd.PersistentFlags().Bool("debug", false, "Keep container running on failure for debugging.")
-
+	validateCmd.PersistentFlags().Int("startup-timeout", 10, "Maximum time (in seconds) to wait for the container to start up.")
 }
