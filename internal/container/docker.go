@@ -26,7 +26,7 @@ type DockerContainer struct {
 }
 
 // Start a container
-func (c *DockerContainer) Start() error {
+func (c *DockerContainer) Start(timeoutSeconds int) error {
 
 	commandArgs := []string{"run", "-d"}
 
@@ -79,12 +79,12 @@ func (c *DockerContainer) Start() error {
 		if info.State.Running {
 			break
 		}
-		if time.Since(startTime) > (time.Second * time.Duration(c.StartupTimeout)) {
+		if time.Since(startTime) > (time.Second * time.Duration(timeoutSeconds)) {
 			err := c.Remove()
 			if err != nil {
 				return err
 			}
-			return fmt.Errorf("container failed to start after %d seconds", c.StartupTimeout)
+			return fmt.Errorf("container failed to start after %d seconds", timeoutSeconds)
 		}
 		time.Sleep(time.Second)
 	}

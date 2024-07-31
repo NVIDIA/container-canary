@@ -37,15 +37,14 @@ type ContainerInfo struct {
 }
 
 type ContainerInterface interface {
-	Start() error
+	Start(timeoutSeconds int) error
 	Remove() error
 	Status() (*ContainerInfo, error)
 	Exec(command ...string) (string, error)
 	Logs() (string, error)
-	GetStartupTimeout() int
 }
 
-func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []canaryv1.Volume, command []string, dockerRunOptions []string, startupTimeout int) ContainerInterface {
+func New(image string, env []v1.EnvVar, ports []v1.ServicePort, volumes []canaryv1.Volume, command []string, dockerRunOptions []string) ContainerInterface {
 	name := fmt.Sprintf("%s%s", "canary-runner-", uuid.New().String()[:8])
-	return &DockerContainer{Name: name, Image: image, Command: command, Env: env, Ports: ports, Volumes: volumes, RunOptions: dockerRunOptions, StartupTimeout: startupTimeout}
+	return &DockerContainer{Name: name, Image: image, Command: command, Env: env, Ports: ports, Volumes: volumes, RunOptions: dockerRunOptions}
 }

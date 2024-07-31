@@ -130,8 +130,8 @@ func loadConfig(filePath string) tea.Cmd {
 
 func startContainer(image string, validator *canaryv1.Validator, startupTimeout int) tea.Cmd {
 	return func() tea.Msg {
-		container := container.New(image, validator.Env, validator.Ports, validator.Volumes, validator.Command, validator.DockerRunOptions, startupTimeout)
-		err := container.Start()
+		container := container.New(image, validator.Env, validator.Ports, validator.Volumes, validator.Command, validator.DockerRunOptions)
+		err := container.Start(startupTimeout)
 		if err != nil {
 			return containerFailed{Error: err}
 		}
