@@ -84,7 +84,7 @@ func (c *DockerContainer) Start() error {
 			if err != nil {
 				return err
 			}
-			return errors.New(fmt.Sprintf("container failed to start after %d seconds", c.StartupTimeout))
+			return fmt.Errorf("container failed to start after %d seconds", c.StartupTimeout)
 		}
 		time.Sleep(time.Second)
 	}

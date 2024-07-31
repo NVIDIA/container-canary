@@ -70,6 +70,9 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		isTty = false
 	}
 	startupTimeout, err := cmd.Flags().GetInt("startup-timeout")
+	if err != nil {
+		return false, err
+	}
 	m := model{
 		sub:              make(chan checkResult),
 		configPath:       configPath,
