@@ -69,16 +69,21 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		tty = bufio.NewReader(os.Stdin)
 		isTty = false
 	}
+	startupTimeout, err := cmd.Flags().GetInt("startup-timeout")
+	if err != nil {
+		return false, err
+	}
 	m := model{
-		sub:              make(chan checkResult),
-		configPath:       configPath,
-		containerStarted: false,
-		spinner:          spinner.New(),
-		progress:         progress.New(progress.WithSolidFill("#f2e63a")),
-		allChecksPassed:  true,
-		debug:            debug,
-		image:            image,
-		tty:              isTty,
+		sub:                     make(chan checkResult),
+		configPath:              configPath,
+		containerStarted:        false,
+		containerStartupTimeout: startupTimeout,
+		spinner:                 spinner.New(),
+		progress:                progress.New(progress.WithSolidFill("#f2e63a")),
+		allChecksPassed:         true,
+		debug:                   debug,
+		image:                   image,
+		tty:                     isTty,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.Run()

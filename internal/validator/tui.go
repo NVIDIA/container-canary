@@ -28,19 +28,20 @@ import (
 )
 
 type model struct {
-	sub              chan checkResult
-	container        container.ContainerInterface
-	containerStarted bool
-	results          []checkResult
-	allChecksPassed  bool
-	spinner          spinner.Model
-	progress         progress.Model
-	debug            bool
-	image            string
-	validator        *canaryv1.Validator
-	configPath       string
-	err              error
-	tty              bool
+	sub                     chan checkResult
+	container               container.ContainerInterface
+	containerStarted        bool
+	containerStartupTimeout int
+	results                 []checkResult
+	allChecksPassed         bool
+	spinner                 spinner.Model
+	progress                progress.Model
+	debug                   bool
+	image                   string
+	validator               *canaryv1.Validator
+	configPath              string
+	err                     error
+	tty                     bool
 }
 
 func (m model) Init() tea.Cmd {
@@ -133,7 +134,8 @@ func handleConfigLoaded(m model, msg configLoaded) (model, tea.Cmd) {
 	if !m.tty {
 		commands = append(commands, tea.Printf("Starting container"))
 	}
-	commands = append(commands, startContainer(m.image, m.validator, m.container.GetStartupTimeout()))
+	// right here... m.container isn't set yet
+	commands = append(commands, startContainer(m.image, m.validator, m.containerStartupTimeout))
 	return m, tea.Batch(commands...)
 }
 
