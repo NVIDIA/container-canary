@@ -41,7 +41,6 @@ type model struct {
 	configPath       string
 	err              error
 	tty              bool
-	containerStartupTimeout int
 }
 
 func (m model) Init() tea.Cmd {

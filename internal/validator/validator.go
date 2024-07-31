@@ -69,10 +69,6 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		tty = bufio.NewReader(os.Stdin)
 		isTty = false
 	}
-	startupTimeout, err := cmd.Flags().GetInt("startup-timeout")
-	if err != nil {
-		return false, err
-	}
 	m := model{
 		sub:              make(chan checkResult),
 		configPath:       configPath,
@@ -83,7 +79,6 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		debug:            debug,
 		image:            image,
 		tty:              isTty,
-		containerStartupTimeout: startupTimeout,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.Run()
