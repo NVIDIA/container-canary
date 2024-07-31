@@ -45,6 +45,7 @@ $ pre-commit install
 pre-commit installed at .git/hooks/pre-commit
 
 $ pre-commit run --all-files
+```
 
 ## Signing Your Work
 
