@@ -41,7 +41,7 @@ PASS
 This project enforces linting with `golangci-lint`. You can use [pre-commit](https://pre-commit.com/) to check this automatically on commit, which will save time as you can catch linting errors before the CI does.
 
 ```console
-$ pre-commit install                                                                  
+$ pre-commit install
 pre-commit installed at .git/hooks/pre-commit
 
 $ pre-commit run --all-files
