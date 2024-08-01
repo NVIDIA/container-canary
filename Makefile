@@ -34,8 +34,8 @@ test: ## Run tests
 	go test -v ./...
 
 testprep: ## Run test prerequisite tasks
-	docker build -t container-canary/kubeflow:shouldpass -f internal/testdata/containers/kubeflow.Dockerfile .
-	docker build -t container-canary/kubeflow:shouldfail -f internal/testdata/containers/kubeflow_broken.Dockerfile .
+	docker build -t container-canary/kubeflow:shouldpass - < internal/testdata/containers/kubeflow.Dockerfile
+	docker build -t container-canary/kubeflow:shouldfail - < internal/testdata/containers/kubeflow_broken.Dockerfile
 
 version:
 	@echo version: $(VERSION)
