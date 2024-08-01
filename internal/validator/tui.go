@@ -134,7 +134,6 @@ func handleConfigLoaded(m model, msg configLoaded) (model, tea.Cmd) {
 	if !m.tty {
 		commands = append(commands, tea.Printf("Starting container"))
 	}
-	// right here... m.container isn't set yet
 	commands = append(commands, startContainer(m.image, m.validator, m.containerStartupTimeout))
 	return m, tea.Batch(commands...)
 }

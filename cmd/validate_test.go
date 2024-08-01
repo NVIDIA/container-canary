@@ -60,3 +60,15 @@ func TestFileDoesNotExist(t *testing.T) {
 	assert.NotNil(err, "did not error")
 	assert.Contains(b.String(), "Cannot find container-canary/kubeflow:doesnotexist", "did not fail")
 }
+
+func TestValidateRespectsStartupTimeout(t *testing.T) {
+	assert := assert.New(t)
+	b := new(bytes.Buffer)
+	rootCmd.SetOut(b)
+	rootCmd.SetErr(b)
+	rootCmd.SetArgs([]string{"validate", "--file", "../examples/kubeflow.yaml", "container-canary/long-sleep:local", "--startup-timeout", "3"})
+	err := rootCmd.Execute()
+
+	assert.NotNil(err, "should fail")
+	assert.Contains(b.String(), "validation failed", "container failed to start after 3 seconds")
+}

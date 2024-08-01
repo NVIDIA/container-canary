@@ -36,6 +36,7 @@ test: ## Run tests
 testprep: ## Run test prerequisite tasks
 	docker build -t container-canary/kubeflow:shouldpass -f internal/testdata/containers/kubeflow.Dockerfile .
 	docker build -t container-canary/kubeflow:shouldfail -f internal/testdata/containers/kubeflow_broken.Dockerfile .
+	docker build -t container-canary/long-sleep:local - <   internal/testdata/containers/long-sleep.Dockerfile
 
 version:
 	@echo version: $(VERSION)
