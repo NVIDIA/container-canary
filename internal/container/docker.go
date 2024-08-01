@@ -154,8 +154,3 @@ func (c DockerContainer) Logs() (string, error) {
 	out, err := exec.Command("docker", "logs", c.Name).Output()
 	return string(out), err
 }
-
-// Get startup timeout
-func (c DockerContainer) GetStartupTimeout() int {
-	return c.StartupTimeout
-}
