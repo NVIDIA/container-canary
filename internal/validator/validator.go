@@ -22,6 +22,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math/rand"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -93,6 +95,62 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 
 }
 
+// checkPorts checks if all the ports are available, if not, for each busy port
+// it tries with a higher port until a valid one is found or it times out.
+// If successful, it updates the validator config with the new ports
+func checkPorts(validatorConfig *canaryv1.Validator) error {
+	found := make(chan struct{})
+	// hold the ports that are already in use
+	usedPorts := make(map[int32]struct{}, len(validatorConfig.Ports))
+	// Generate a random port between 1024 and 65535
+	getRandomPort := func() int32 {
+		return rand.Int31n(65535-1024) + 1024
+	}
+
+	for i := range validatorConfig.Ports {
+		port := validatorConfig.Ports[i].Port
+
+		go func() {
+			for {
+				if _, ok := usedPorts[port]; ok {
+					port = getRandomPort()
+					continue
+				}
+
+				if _, err := net.DialTimeout("tcp", net.JoinHostPort("", fmt.Sprintf("%d", port)), time.Second); err != nil {
+					if port == validatorConfig.Ports[i].Port {
+						usedPorts[port] = struct{}{}
+						found <- struct{}{}
+						return
+					}
+
+					for j := range validatorConfig.Checks {
+						if validatorConfig.Checks[j].Probe.HTTPGet.Port == int(validatorConfig.Ports[i].Port) {
+							validatorConfig.Checks[j].Probe.HTTPGet.Port = int(port)
+						}
+					}
+					validatorConfig.Ports[i].Port = port
+
+					usedPorts[port] = struct{}{}
+					found <- struct{}{}
+					return
+				}
+
+				port = getRandomPort()
+			}
+		}()
+
+		// wait for 3 seconds to connect to a valid port, fail otherwise
+		select {
+		case <-time.After(time.Second * 3):
+			return fmt.Errorf("could not find a valid port for %d", validatorConfig.Ports[i].Port)
+		case <-found:
+			continue
+		}
+	}
+	return nil
+}
+
 func loadConfig(filePath string) tea.Cmd {
 	return func() tea.Msg {
 		var validatorConfig *canaryv1.Validator
@@ -113,6 +171,13 @@ func loadConfig(filePath string) tea.Cmd {
 			return configLoaded{
 				Config: nil,
 				Error:  errors.New("no checks found"),
+			}
+		}
+
+		if err = checkPorts(validatorConfig); err != nil {
+			return configLoaded{
+				Config: nil,
+				Error:  err,
 			}
 		}
 
