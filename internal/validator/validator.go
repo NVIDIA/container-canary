@@ -69,16 +69,21 @@ func Validate(image string, configPath string, cmd *cobra.Command, debug bool) (
 		tty = bufio.NewReader(os.Stdin)
 		isTty = false
 	}
+	startupTimeout, err := cmd.Flags().GetInt("startup-timeout")
+	if err != nil {
+		return false, err
+	}
 	m := model{
-		sub:              make(chan checkResult),
-		configPath:       configPath,
-		containerStarted: false,
-		spinner:          spinner.New(),
-		progress:         progress.New(progress.WithSolidFill("#f2e63a")),
-		allChecksPassed:  true,
-		debug:            debug,
-		image:            image,
-		tty:              isTty,
+		sub:                     make(chan checkResult),
+		configPath:              configPath,
+		containerStarted:        false,
+		containerStartupTimeout: startupTimeout,
+		spinner:                 spinner.New(),
+		progress:                progress.New(progress.WithSolidFill("#f2e63a")),
+		allChecksPassed:         true,
+		debug:                   debug,
+		image:                   image,
+		tty:                     isTty,
 	}
 	p := tea.NewProgram(m, tea.WithInput(tty), tea.WithOutput(cmd.OutOrStderr()))
 	out, err := p.Run()
@@ -123,10 +128,10 @@ func loadConfig(filePath string) tea.Cmd {
 	}
 }
 
-func startContainer(image string, validator *canaryv1.Validator) tea.Cmd {
+func startContainer(image string, validator *canaryv1.Validator, startupTimeout int) tea.Cmd {
 	return func() tea.Msg {
 		container := container.New(image, validator.Env, validator.Ports, validator.Volumes, validator.Command, validator.DockerRunOptions)
-		err := container.Start()
+		err := container.Start(startupTimeout)
 		if err != nil {
 			return containerFailed{Error: err}
 		}

@@ -37,7 +37,7 @@ type ContainerInfo struct {
 }
 
 type ContainerInterface interface {
-	Start() error
+	Start(timeoutSeconds int) error
 	Remove() error
 	Status() (*ContainerInfo, error)
 	Exec(command ...string) (string, error)

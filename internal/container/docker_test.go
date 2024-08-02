@@ -39,7 +39,7 @@ func TestDockerContainer(t *testing.T) {
 	}
 	c := New("nginx", env, ports, volumes, nil, nil)
 
-	err := c.Start()
+	err := c.Start(10)
 
 	defer func() {
 		err := c.Remove()
@@ -71,7 +71,7 @@ func TestDockerContainer(t *testing.T) {
 func TestDockerContainerRemoves(t *testing.T) {
 	c := New("nginx", nil, nil, nil, nil, nil)
 
-	err := c.Start()
+	err := c.Start(10)
 	if err != nil {
 		t.Errorf("Failed to start container: %s", err.Error())
 		return
