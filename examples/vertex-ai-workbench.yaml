@@ -1,0 +1,11 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: vertex-ai-workbench
+description: Vertex AI Workbench
+command: ["sleep", "60"]
+checks:
+  - name: jupyter-kernelspec-list
+    description: Can list Jupyter kernels
+    probe:
+      exec:
+        command: ["jupyter", "kernelspec", "list", "--json"]
