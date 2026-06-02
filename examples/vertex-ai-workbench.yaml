@@ -1,0 +1,35 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: vertex-ai-workbench
+description: Vertex AI Workbench
+documentation: https://cloud.google.com/vertex-ai/docs/workbench/instances/create-custom-container
+env: []
+ports:
+  - port: 8080
+    protocol: TCP
+volumes:
+  - mountPath: /home/jupyter
+checks:
+  - name: user
+    description: 👩 User is jupyter
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $(whoami) = jupyter ]"
+  - name: home
+    description: 🏠 Home directory is /home/jupyter
+    probe:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "[ $HOME = /home/jupyter ]"
+  - name: http
+    description: 🌏 Exposes an HTTP interface on port 8080
+    probe:
+      httpGet:
+        path: /
+        port: 8080
+      failureThreshold: 30
