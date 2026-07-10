@@ -28,6 +28,8 @@ import (
 
 func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
 	action := probe.HTTPGet
+	// Match the Kubernetes kubelet: follow redirects and treat any 2xx or 3xx
+	// (200 <= code < 400) response as a success.
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", action.Port, action.Path), nil)
 	if err != nil {
@@ -42,13 +44,16 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 	if err != nil {
 		return false, nil
 	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return false, nil
+	}
 	for _, header := range action.ResponseHTTPHeaders {
-		if val, ok := resp.Header[header.Name]; ok {
-			if header.Value != strings.Join(val[:], "") {
-				return false, nil
-			}
+		val, ok := resp.Header[header.Name]
+		if !ok || header.Value != strings.Join(val[:], "") {
+			return false, nil
 		}
 	}
-	defer resp.Body.Close()
 	return true, nil
 }
