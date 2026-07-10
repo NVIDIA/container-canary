@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.14
 
 ARG UNAME=bob
 ARG UID=1000
@@ -14,6 +14,6 @@ WORKDIR /home/bob
 
 ENV PATH=/home/bob/.local/bin:$PATH
 
-RUN pip install jupyterlab
+RUN pip install jupyterlab==4.6.1 jupyter-server==2.20.0
 
-CMD jupyter lab --ip=0.0.0.0
+CMD jupyter lab --ip=0.0.0.0 --ServerApp.base_url="${NB_PREFIX}" --ServerApp.allow_origin="*" --IdentityProvider.token=""
