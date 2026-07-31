@@ -57,3 +57,95 @@ func TestValidator(t *testing.T) {
 	assert.Equal("Access-Control-Allow-Origin", header.Name)
 	assert.Equal("*", header.Value)
 }
+
+func TestLoadValidatorFromBytesValidatesProbeActions(t *testing.T) {
+	tests := []struct {
+		name    string
+		probe   string
+		wantErr string
+	}{
+		{
+			name:    "no action",
+			probe:   ` {}`,
+			wantErr: `checks[0] "test-check": probe must define exactly one supported action, found 0`,
+		},
+		{
+			name: "multiple actions",
+			probe: `
+      exec:
+        command: ["true"]
+      tcpSocket:
+        port: 8080`,
+			wantErr: `checks[0] "test-check": probe must define exactly one supported action, found 2`,
+		},
+		{
+			name: "empty exec action",
+			probe: `
+      exec: {}`,
+			wantErr: `checks[0] "test-check": exec probe must define at least one command`,
+		},
+		{
+			name: "empty HTTP GET action",
+			probe: `
+      httpGet: {}`,
+			wantErr: `checks[0] "test-check": httpGet probe port must be between 1 and 65535`,
+		},
+		{
+			name: "empty TCP socket action",
+			probe: `
+      tcpSocket: {}`,
+			wantErr: `checks[0] "test-check": tcpSocket probe port must be between 1 and 65535`,
+		},
+		{
+			name: "HTTP GET port above range",
+			probe: `
+      httpGet:
+        port: 65536`,
+			wantErr: `checks[0] "test-check": httpGet probe port must be between 1 and 65535`,
+		},
+		{
+			name: "TCP socket port above range",
+			probe: `
+      tcpSocket:
+        port: 65536`,
+			wantErr: `checks[0] "test-check": tcpSocket probe port must be between 1 and 65535`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			manifest := []byte(`name: example
+checks:
+  - name: test-check
+    probe:` + tt.probe + "\n")
+
+			validator, err := LoadValidatorFromBytes(manifest)
+
+			assert.Nil(t, validator)
+			assert.EqualError(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestLoadValidatorFromBytesAcceptsUsableProbeActions(t *testing.T) {
+	manifest := []byte(`name: example
+checks:
+  - name: exec
+    probe:
+      exec:
+        command: ["true"]
+  - name: http
+    probe:
+      httpGet:
+        port: 8080
+  - name: tcp
+    probe:
+      tcpSocket:
+        port: 8080
+`)
+
+	validator, err := LoadValidatorFromBytes(manifest)
+
+	assert.NoError(t, err)
+	assert.Len(t, validator.Checks, 3)
+}
