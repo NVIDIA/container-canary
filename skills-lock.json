@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "issue-writer": {
+      "source": "jacobtomlinson/skills",
+      "sourceType": "github",
+      "skillPath": "skills/issue-writer/SKILL.md",
+      "computedHash": "784047882b87887f16d4c9a5faf0244d4054231aafc90a533c775f956f67fed5"
+    }
+  }
+}
