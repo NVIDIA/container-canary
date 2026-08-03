@@ -116,6 +116,49 @@ func TestHTTPGetCheckResponseHeaders(t *testing.T) {
 	}
 }
 
+func TestHTTPGetCheckUsesConfiguredScheme(t *testing.T) {
+	tests := []struct {
+		name      string
+		newServer func(http.Handler) *httptest.Server
+		scheme    v1.URIScheme
+		want      bool
+	}{
+		{
+			name:      "HTTPS probe passes against HTTPS server",
+			newServer: httptest.NewTLSServer,
+			scheme:    v1.URISchemeHTTPS,
+			want:      true,
+		},
+		{
+			name:      "HTTPS probe fails against HTTP server",
+			newServer: httptest.NewServer,
+			scheme:    v1.URISchemeHTTPS,
+			want:      false,
+		},
+		{
+			name:      "HTTP probe passes against HTTP server",
+			newServer: httptest.NewServer,
+			scheme:    v1.URISchemeHTTP,
+			want:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := tt.newServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			probe := httpGetProbe(server, nil)
+			probe.HTTPGet.Scheme = tt.scheme
+			got, err := HTTPGetCheck(nil, probe)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func httpGetProbe(server *httptest.Server, responseHeaders []v1.HTTPHeader) *canaryv1.Probe {
 	return &canaryv1.Probe{
 		HTTPGet: &canaryv1.HTTPGetAction{
