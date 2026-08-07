@@ -23,6 +23,7 @@ Container Canary is a tool for recording those requirements as a manifest that c
   - [Installation](#installation)
   - [Example (Kubeflow)](#example-kubeflow)
   - [Validator reference](#validator-reference)
+    - [Validator schema](#validator-schema)
     - [Metadata](#metadata)
     - [Runtime options](#runtime-options)
       - [Environment variables](#environment-variables)
@@ -146,6 +147,68 @@ For more examples [see the examples directory](examples/).
 
 Validator manifests are YAML files that describe how to validate a container image. Check out the [examples](examples/) directory for real world applications.
 
+### Validator schema
+
+Container Canary publishes a self-contained JSON Schema for each supported Validator API version. The v1 schema is [container-canary.nvidia.com/v1/validator.schema.json](schema/container-canary.nvidia.com/v1/validator.schema.json).
+
+#### Choosing a schema URL
+
+Use the raw GitHub URL from the Container Canary release that matches the binary you run:
+
+```text
+https://raw.githubusercontent.com/NVIDIA/container-canary/<release-tag>/schema/container-canary.nvidia.com/v1/validator.schema.json
+```
+
+Replace `<release-tag>` with the binary release tag, for example `v0.6.0`. Do not use `main` or another branch for a production manifest. The release tag pins the exact schema shipped with that binary. `apiVersion: container-canary.nvidia.com/v1` remains the manifest API compatibility boundary, so one binary release can publish more than one API schema.
+
+Each release tag contains the schema at this path, so the raw URL is available without a separate release asset. YAML-aware editors can use it directly:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/NVIDIA/container-canary/v0.6.0/schema/container-canary.nvidia.com/v1/validator.schema.json
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+```
+
+The schema declares JSON Schema draft 2020-12 and has no `$ref` or import of Kubernetes or OpenAPI material.
+
+#### Kubernetes provenance and supported subsets
+
+Container Canary is not a Kubernetes API server and its manifest is not a Pod spec. The schema defines Container Canary types locally. Some shapes are derived from Kubernetes `core/v1` types, but only the fields below are part of this contract.
+
+| Validator field | Kubernetes provenance | Supported subset | Intentional exclusions |
+| --- | --- | --- | --- |
+| `env[]` | `core/v1.EnvVar` | `name`, `value` | `valueFrom` and all Kubernetes value-source semantics |
+| `ports[]` | `core/v1.ServicePort` | `port`, `protocol` | `name`, `targetPort`, `nodePort`, `appProtocol`, and Service semantics |
+| `checks[].probe.exec` | `core/v1.ExecAction` | `command` | No Pod lifecycle semantics; this is a Container Canary check action |
+| `httpHeaders[]`, `responseHttpHeaders[]` | `core/v1.HTTPHeader` | `name`, `value` | No additional Kubernetes HTTP behavior |
+
+`checks[].probe` is a Container Canary type. In v1 it supports exactly one of `exec`, `httpGet`, or `tcpSocket`; it is not a Kubernetes `Probe` and does not currently support `grpc`.
+
+#### Adapting Kubernetes configuration
+
+Schema validation is deliberately strict, and the schema validation command adds targeted guidance for common copied Kubernetes fields:
+
+| Copied field | Diagnostic | Correction |
+| --- | --- | --- |
+| `env[0].valueFrom` | Kubernetes `core/v1.EnvVar` field unsupported by Container Canary | Supply a literal `env[].value`, or arrange the value outside the manifest |
+| `checks[0].probe.grpc` | Kubernetes probe action unsupported in v1 | Use `exec`, `httpGet`, or `tcpSocket` |
+| `livenessProbe`, `readinessProbe`, `startupProbe` | Kubernetes Pod field, not a Validator field | Put the selected action under `checks[].probe` |
+
+#### Independent validation tooling
+
+The repository validates the schema and every checked-in example in `go test ./...` using [jsonschema v6](https://github.com/santhosh-tekuri/jsonschema), which supports JSON Schema draft 2020-12 and YAML input. This test is run by the repository test workflow.
+
+Users can validate a manifest without executing a Container Canary image validation using either of these commands:
+
+```console
+$ go run . schema-validate --schema schema/container-canary.nvidia.com/v1/validator.schema.json examples/awesome.yaml
+$ go install github.com/santhosh-tekuri/jsonschema/cmd/jv@v0.7.0
+$ jv schema/container-canary.nvidia.com/v1/validator.schema.json examples/awesome.yaml
+```
+
+The first command also provides the adaptation diagnostics above. The second demonstrates that the published schema is usable by an independent JSON Schema validator.
+
+
 ### Metadata
 
 Each manifests starts with some metadata.
@@ -208,7 +271,7 @@ command:
 
 ### Checks
 
-Checks are the tests that we want to run against the container to ensure it is compliant. Each check contains a probe, and those probes are superset of the Kubernetes [probes](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) API and so any valid Kubernetes probe can be used in a check.
+Checks are the tests that we want to run against the container to ensure it is compliant. Each check contains a Container Canary probe. The v1 API supports exactly one `exec`, `httpGet`, or `tcpSocket` action per check; it is not a Kubernetes Probe and does not accept every Kubernetes probe action. See the [Validator schema](#validator-schema) for the complete supported subset and guidance for adapting Kubernetes configuration.
 
 ```yaml
 checks:

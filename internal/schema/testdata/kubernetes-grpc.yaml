@@ -1,0 +1,8 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: copied-grpc
+checks:
+  - name: grpc
+    probe:
+      grpc:
+        port: 8080
