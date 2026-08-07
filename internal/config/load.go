@@ -70,46 +70,6 @@ func LoadValidatorFromBytes(b []byte) (*canaryv1.Validator, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := validateChecks(validator.Checks); err != nil {
-		return nil, err
-	}
 
 	return &validator, nil
-}
-
-func validateChecks(checks []canaryv1.Check) error {
-	for i, check := range checks {
-		actionCount := 0
-		if check.Probe.Exec != nil {
-			actionCount++
-		}
-		if check.Probe.HTTPGet != nil {
-			actionCount++
-		}
-		if check.Probe.TCPSocket != nil {
-			actionCount++
-		}
-
-		checkIdentifier := fmt.Sprintf("checks[%d] %q", i, check.Name)
-		if actionCount != 1 {
-			return fmt.Errorf("%s: probe must define exactly one supported action, found %d", checkIdentifier, actionCount)
-		}
-
-		switch {
-		case check.Probe.Exec != nil:
-			if len(check.Probe.Exec.Command) == 0 {
-				return fmt.Errorf("%s: exec probe must define at least one command", checkIdentifier)
-			}
-		case check.Probe.HTTPGet != nil:
-			if check.Probe.HTTPGet.Port < 1 || check.Probe.HTTPGet.Port > 65535 {
-				return fmt.Errorf("%s: httpGet probe port must be between 1 and 65535", checkIdentifier)
-			}
-		case check.Probe.TCPSocket != nil:
-			if check.Probe.TCPSocket.Port < 1 || check.Probe.TCPSocket.Port > 65535 {
-				return fmt.Errorf("%s: tcpSocket probe port must be between 1 and 65535", checkIdentifier)
-			}
-		}
-	}
-
-	return nil
 }
