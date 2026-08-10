@@ -1,0 +1,12 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: copied-pod-probe
+livenessProbe:
+  httpGet:
+    path: /
+    port: 8080
+checks:
+  - name: command
+    probe:
+      exec:
+        command: ["true"]

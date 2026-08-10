@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/NVIDIA/container-canary/<release-tag>/schema/container-canary.nvidia.com/v1/validator.schema.json",
+  "title": "Container Canary v1 Validator",
+  "description": "The self-contained public contract for container-canary.nvidia.com/v1 Validator manifests.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "name", "checks"],
+  "properties": {
+    "apiVersion": {"const": "container-canary.nvidia.com/v1"},
+    "kind": {"const": "Validator"},
+    "name": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "documentation": {"type": ["string", "null"], "format": "uri"},
+    "env": {"type": "array", "items": {"$ref": "#/$defs/envVar"}},
+    "ports": {"type": "array", "items": {"$ref": "#/$defs/servicePort"}},
+    "volumes": {"type": "array", "items": {"$ref": "#/$defs/volume"}},
+    "command": {"type": "array", "items": {"type": "string"}},
+    "dockerRunOptions": {"type": "array", "items": {"type": "string"}},
+    "checks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/check"}}
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "envVar": {
+      "description": "Container Canary subset of Kubernetes core/v1.EnvVar. Only name and value are supported; valueFrom is not supported.",
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "value": {"type": "string"}},
+      "unevaluatedProperties": false
+    },
+    "servicePort": {
+      "description": "Container Canary subset of Kubernetes core/v1.ServicePort. Only port and protocol are supported.",
+      "type": "object",
+      "required": ["port", "protocol"],
+      "properties": {
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "protocol": {"enum": ["TCP", "UDP", "SCTP"]}
+      },
+      "unevaluatedProperties": false
+    },
+    "volume": {
+      "type": "object",
+      "required": ["mountPath"],
+      "properties": {"mountPath": {"type": "string", "minLength": 1}, "path": {"type": "string"}},
+      "unevaluatedProperties": false
+    },
+    "check": {
+      "type": "object",
+      "required": ["name", "probe"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "description": {"type": "string"}, "probe": {"$ref": "#/$defs/probe"}},
+      "unevaluatedProperties": false
+    },
+    "probe": {
+      "description": "Container Canary probe. It supports exactly one action: exec, httpGet, or tcpSocket.",
+      "type": "object",
+      "properties": {
+        "initialDelaySeconds": {"type": "integer", "minimum": 0, "default": 0},
+        "timeoutSeconds": {"type": "integer", "minimum": 1, "default": 30},
+        "periodSeconds": {"type": "integer", "minimum": 1, "default": 1},
+        "successThreshold": {"type": "integer", "minimum": 1, "default": 1},
+        "failureThreshold": {"type": "integer", "minimum": 1, "default": 1},
+        "exec": {"$ref": "#/$defs/execAction"},
+        "httpGet": {"$ref": "#/$defs/httpGetAction"},
+        "tcpSocket": {"$ref": "#/$defs/tcpSocketAction"}
+      },
+      "oneOf": [
+        {"required": ["exec"], "not": {"anyOf": [{"required": ["httpGet"]}, {"required": ["tcpSocket"]}]}},
+        {"required": ["httpGet"], "not": {"anyOf": [{"required": ["exec"]}, {"required": ["tcpSocket"]}]}},
+        {"required": ["tcpSocket"], "not": {"anyOf": [{"required": ["exec"]}, {"required": ["httpGet"]}]}}
+      ],
+      "unevaluatedProperties": false
+    },
+    "execAction": {
+      "description": "Container Canary subset of Kubernetes core/v1.ExecAction. Only command is supported.",
+      "type": "object",
+      "required": ["command"],
+      "properties": {"command": {"type": "array", "minItems": 1, "items": {"type": "string"}}},
+      "unevaluatedProperties": false
+    },
+    "httpGetAction": {
+      "description": "Container Canary HTTP action. Request and response header entries use the core/v1.HTTPHeader subset defined here.",
+      "type": "object",
+      "required": ["port"],
+      "properties": {
+        "path": {"type": "string"},
+        "port": {"type": "integer", "minimum": 1, "maximum": 65535},
+        "httpHeaders": {"type": "array", "items": {"$ref": "#/$defs/httpHeader"}},
+        "responseHttpHeaders": {"type": "array", "items": {"$ref": "#/$defs/httpHeader"}}
+      },
+      "unevaluatedProperties": false
+    },
+    "tcpSocketAction": {
+      "type": "object",
+      "required": ["port"],
+      "properties": {"port": {"type": "integer", "minimum": 1, "maximum": 65535}},
+      "unevaluatedProperties": false
+    },
+    "httpHeader": {
+      "description": "Container Canary subset of Kubernetes core/v1.HTTPHeader.",
+      "type": "object",
+      "required": ["name", "value"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "value": {"type": "string"}},
+      "unevaluatedProperties": false
+    }
+  }
+}

@@ -1,0 +1,14 @@
+apiVersion: container-canary.nvidia.com/v1
+kind: Validator
+name: copied-env
+env:
+  - name: TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: token
+        key: value
+checks:
+  - name: command
+    probe:
+      exec:
+        command: ["true"]
