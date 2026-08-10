@@ -1,0 +1,4 @@
+interface:
+  display_name: "Making a Commit"
+  short_description: "Create DCO-signed commits for this project."
+  default_prompt: "Create a DCO-signed commit for my changes."

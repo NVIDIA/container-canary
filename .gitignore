@@ -13,3 +13,6 @@
 
 # Build artifacts
 bin/
+
+# Local Git worktrees
+.worktrees/
