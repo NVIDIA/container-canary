@@ -57,3 +57,123 @@ func TestValidator(t *testing.T) {
 	assert.Equal("Access-Control-Allow-Origin", header.Name)
 	assert.Equal("*", header.Value)
 }
+
+func TestLoadValidatorFromBytesValidatesProbeActions(t *testing.T) {
+	tests := []struct {
+		name    string
+		probe   string
+		wantErr string
+	}{
+		{
+			name:    "no action",
+			probe:   ` {}`,
+			wantErr: `check "test-check": probe must define exactly one supported action, found 0`,
+		},
+		{
+			name: "multiple actions",
+			probe: `
+      exec:
+        command: ["true"]
+      tcpSocket:
+        port: 8080`,
+			wantErr: `check "test-check": probe must define exactly one supported action, found 2`,
+		},
+		{
+			name: "empty exec action",
+			probe: `
+      exec: {}`,
+			wantErr: `check "test-check": exec probe must define at least one command`,
+		},
+		{
+			name: "empty HTTP GET action",
+			probe: `
+      httpGet: {}`,
+			wantErr: `check "test-check": httpGet probe port must be between 1 and 65535`,
+		},
+		{
+			name: "empty TCP socket action",
+			probe: `
+      tcpSocket: {}`,
+			wantErr: `check "test-check": tcpSocket probe port must be between 1 and 65535`,
+		},
+		{
+			name: "HTTP GET port above range",
+			probe: `
+      httpGet:
+        port: 65536`,
+			wantErr: `check "test-check": httpGet probe port must be between 1 and 65535`,
+		},
+		{
+			name: "TCP socket port above range",
+			probe: `
+      tcpSocket:
+        port: 65536`,
+			wantErr: `check "test-check": tcpSocket probe port must be between 1 and 65535`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			manifest := []byte(`name: example
+checks:
+  - name: test-check
+    probe:` + tt.probe + "\n")
+
+			validator, err := LoadValidatorFromBytes(manifest)
+
+			assert.Nil(t, validator)
+			assert.EqualError(t, err, tt.wantErr)
+		})
+	}
+}
+
+func TestLoadValidatorFromBytesAcceptsUsableProbeActions(t *testing.T) {
+	manifest := []byte(`name: example
+checks:
+  - name: exec
+    probe:
+      exec:
+        command: ["true"]
+  - name: http
+    probe:
+      httpGet:
+        port: 8080
+  - name: tcp
+    probe:
+      tcpSocket:
+        port: 8080
+`)
+
+	validator, err := LoadValidatorFromBytes(manifest)
+
+	assert.NoError(t, err)
+	assert.Len(t, validator.Checks, 3)
+}
+
+func TestLoadValidatorFromBytesRejectsMissingProbe(t *testing.T) {
+	validator, err := LoadValidatorFromBytes([]byte("name: example\nchecks:\n  - name: test-check\n"))
+
+	assert.Nil(t, validator)
+	assert.EqualError(t, err, "check \"test-check\": probe must define exactly one supported action, found 0")
+}
+
+func TestLoadValidatorFromBytesIdentifiesInvalidCheck(t *testing.T) {
+	validator, err := LoadValidatorFromBytes([]byte(`name: example
+checks:
+  - name: valid-check
+    probe:
+      exec:
+        command: ["true"]
+  - name: invalid-check
+    probe: {}`))
+
+	assert.Nil(t, validator)
+	assert.EqualError(t, err, "check \"invalid-check\": probe must define exactly one supported action, found 0")
+}
+
+func TestLoadValidatorFromBytesIdentifiesMalformedPortCheck(t *testing.T) {
+	validator, err := LoadValidatorFromBytes([]byte("name: example\nchecks:\n  - name: invalid-check\n    probe:\n      httpGet:\n        port: not-a-number\n"))
+
+	assert.Nil(t, validator)
+	assert.EqualError(t, err, "check \"invalid-check\": httpGet probe port must be an integer between 1 and 65535")
+}
