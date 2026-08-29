@@ -18,12 +18,14 @@
 package validator
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
 	"strings"
 
 	canaryv1 "github.com/nvidia/container-canary/internal/apis/v1"
 	"github.com/nvidia/container-canary/internal/container"
+	v1 "k8s.io/api/core/v1"
 )
 
 func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, error) {
@@ -31,7 +33,18 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 	// Match the Kubernetes kubelet: follow redirects and treat any 2xx or 3xx
 	// (200 <= code < 400) response as a success.
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", fmt.Sprintf("http://localhost:%d%s", action.Port, action.Path), nil)
+	scheme := strings.ToLower(string(action.Scheme))
+	if scheme == "" {
+		scheme = strings.ToLower(string(v1.URISchemeHTTP))
+	}
+	if action.Scheme == v1.URISchemeHTTPS {
+		transport := http.DefaultTransport.(*http.Transport).Clone()
+		// Kubernetes skips certificate verification for HTTPS probes because
+		// container-local endpoints commonly use self-signed certificates.
+		transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec
+		client.Transport = transport
+	}
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s://localhost:%d%s", scheme, action.Port, action.Path), nil)
 	if err != nil {
 		return false, nil
 	}
