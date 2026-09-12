@@ -21,6 +21,12 @@ import v1 "k8s.io/api/core/v1"
 
 // Validator contains validator specification
 type Validator struct {
+	// The API version declared by the validator manifest.
+	APIVersion string `yaml:"apiVersion"`
+
+	// The resource kind declared by the validator manifest.
+	Kind string `yaml:"kind"`
+
 	// The validator name.
 	// +optional
 	Name string
@@ -51,7 +57,7 @@ type Validator struct {
 
 	// Additional flags to pass to the docker CLI.
 	// +optional
-	DockerRunOptions []string  `yaml:"dockerRunOptions"`
+	DockerRunOptions []string `yaml:"dockerRunOptions"`
 }
 
 type Check struct {
