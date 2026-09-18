@@ -66,7 +66,7 @@ func LoadValidatorFromFile(path string) (*canaryv1.Validator, error) {
 func LoadValidatorFromBytes(b []byte) (*canaryv1.Validator, error) {
 	var validator canaryv1.Validator
 
-	err := yaml.Unmarshal(b, &validator)
+	err := yaml.UnmarshalStrict(b, &validator)
 	if err != nil {
 		return nil, err
 	}

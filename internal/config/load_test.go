@@ -21,7 +21,60 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestLoadValidatorPreservesIdentity(t *testing.T) {
+	tests := []struct {
+		name       string
+		identity   string
+		apiVersion string
+		kind       string
+	}{
+		{
+			name:       "documented identity",
+			identity:   "apiVersion: container-canary.nvidia.com/v1\nkind: Validator\n",
+			apiVersion: "container-canary.nvidia.com/v1",
+			kind:       "Validator",
+		},
+		{
+			name:       "custom identity",
+			identity:   "apiVersion: example.invalid/v99\nkind: SomethingElse\n",
+			apiVersion: "example.invalid/v99",
+			kind:       "SomethingElse",
+		},
+		{
+			name:     "missing API version",
+			identity: "kind: Validator\n",
+			kind:     "Validator",
+		},
+		{
+			name:       "missing kind",
+			identity:   "apiVersion: container-canary.nvidia.com/v1\n",
+			apiVersion: "container-canary.nvidia.com/v1",
+		},
+		{
+			name: "missing identity",
+		},
+	}
+
+	const manifest = `name: example
+checks:
+  - name: command
+    probe:
+      exec:
+        command: ["true"]
+`
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			validator, err := LoadValidatorFromBytes([]byte(tt.identity + manifest))
+			require.NoError(t, err)
+			assert.Equal(t, tt.apiVersion, validator.APIVersion)
+			assert.Equal(t, tt.kind, validator.Kind)
+		})
+	}
+}
 
 func TestValidator(t *testing.T) {
 	assert := assert.New(t)
@@ -29,6 +82,8 @@ func TestValidator(t *testing.T) {
 	validator, err := LoadValidatorFromFile("../../examples/kubeflow.yaml")
 
 	assert.Nil(err)
+	assert.Equal("container-canary.nvidia.com/v1", validator.APIVersion)
+	assert.Equal("Validator", validator.Kind)
 	assert.Equal("kubeflow", validator.Name)
 	assert.Equal("Kubeflow notebooks", validator.Description)
 
