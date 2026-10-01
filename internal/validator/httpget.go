@@ -46,7 +46,7 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode >= http.StatusBadRequest {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
 		return false, nil
 	}
 	for _, header := range action.ResponseHTTPHeaders {

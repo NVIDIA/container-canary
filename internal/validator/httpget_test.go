@@ -34,6 +34,7 @@ func TestHTTPGetCheckStatusCode(t *testing.T) {
 		statusCode int
 		want       bool
 	}{
+		{name: "101 fails", statusCode: http.StatusSwitchingProtocols, want: false},
 		{name: "200 passes", statusCode: http.StatusOK, want: true},
 		{name: "299 passes", statusCode: 299, want: true},
 		{name: "301 passes", statusCode: http.StatusMovedPermanently, want: true},
