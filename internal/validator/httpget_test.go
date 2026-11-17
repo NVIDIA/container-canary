@@ -125,3 +125,31 @@ func httpGetProbe(server *httptest.Server, responseHeaders []v1.HTTPHeader) *can
 		},
 	}
 }
+
+func TestHTTPGetCheckResponseHeaderNameIsCaseInsensitive(t *testing.T) {
+	tests := []struct {
+		name       string
+		headerName string
+	}{
+		{name: "canonical name", headerName: "Access-Control-Allow-Origin"},
+		{name: "lowercase name", headerName: "access-control-allow-origin"},
+		{name: "ETag", headerName: "ETag"},
+		{name: "WWW-Authenticate", headerName: "WWW-Authenticate"},
+		{name: "X-XSS-Protection", headerName: "X-XSS-Protection"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set(tt.headerName, "expected")
+				w.WriteHeader(http.StatusOK)
+			}))
+			defer server.Close()
+
+			headers := []v1.HTTPHeader{{Name: tt.headerName, Value: "expected"}}
+			got, err := HTTPGetCheck(nil, httpGetProbe(server, headers))
+			assert.NoError(t, err)
+			assert.True(t, got)
+		})
+	}
+}

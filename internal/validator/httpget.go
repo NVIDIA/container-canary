@@ -50,8 +50,10 @@ func HTTPGetCheck(c container.ContainerInterface, probe *canaryv1.Probe) (bool, 
 		return false, nil
 	}
 	for _, header := range action.ResponseHTTPHeaders {
-		val, ok := resp.Header[header.Name]
-		if !ok || header.Value != strings.Join(val[:], "") {
+		// Header names are case-insensitive; Values canonicalizes the name
+		// before looking it up.
+		val := resp.Header.Values(header.Name)
+		if len(val) == 0 || header.Value != strings.Join(val, "") {
 			return false, nil
 		}
 	}
